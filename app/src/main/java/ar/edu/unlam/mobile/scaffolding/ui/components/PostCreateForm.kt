@@ -36,11 +36,9 @@ fun PostCreateForm(
                 contentDescription = "Perfil",
                 modifier = Modifier.size(72.dp),
             )
-
             Spacer(
                 modifier = Modifier.width(16.dp),
-                )
-
+            )
             OutlinedTextField(
                 value = postText,
                 onValueChange = { onPostTextChange(it) },
