@@ -23,39 +23,37 @@ import androidx.compose.ui.unit.dp
 fun PostCreateForm(
     postText: String,
     onPostTextChange: (String) -> Unit,
-    onPublishClick: () -> Unit
+    onPublishClick: () -> Unit,
 ) {
-
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            // Avatar
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = "Perfil",
-                modifier = Modifier.size(72.dp)
+                modifier = Modifier.size(72.dp),
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(
+                modifier = Modifier.width(16.dp),
+                )
 
-            // TextField
             OutlinedTextField(
                 value = postText,
                 onValueChange = { onPostTextChange(it) },
                 placeholder = { Text("¿Qué estás pensando?") },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
         ) {
             Button(
-                onClick = onPublishClick
+                onClick = onPublishClick,
             ) {
                 Text("Publicar")
             }
@@ -69,6 +67,6 @@ fun PostCreateFormPreview() {
     PostCreateForm(
         postText = "",
         onPostTextChange = {},
-        onPublishClick = {}
+        onPublishClick = {},
     )
 }
