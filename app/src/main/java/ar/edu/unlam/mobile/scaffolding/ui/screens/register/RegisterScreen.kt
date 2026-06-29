@@ -62,7 +62,7 @@ fun RegisterScreen(
         }
 
         is UiState.Error -> {
-            ShowRegisterErrorScreen(state.error) { registerViewModel.setUiStateAsIdle() }
+            ShowRegisterErrorScreen(state.error) { registerViewModel.restoreStatus() }
         }
     }
 }
