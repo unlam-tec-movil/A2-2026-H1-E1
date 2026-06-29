@@ -22,11 +22,11 @@ class PostRepositoryImpl
         override suspend fun createNewPost(
             createPostRequest: PostCreationRequest,
             userToken: String,
-        ): PostCreationResponse = tuiterApiService.createPost(createPostRequest, userToken)
+        ): PostCreationResponse = tuiterApiService.createPost(createPostRequest, "Bearer $userToken")
 
         override suspend fun getPostList(): List<PostResponse> =
             tuiterApiService.getPosts(
-                userToken = tokenManager.tokenFlow.first(),
+                userToken = "Bearer ${tokenManager.tokenFlow.first()}",
                 pageNumber = 1,
                 onlyParents = true,
             )
@@ -42,10 +42,10 @@ class PostRepositoryImpl
         override fun getAllDrafts(): Flow<List<Draft>> = draftDao.getAllDrafts()
 
         override suspend fun likePost(postId: Int, userToken: String) {
-            tuiterApiService.likePost(postId, userToken)
+            tuiterApiService.likePost(postId, "Bearer $userToken")
         }
 
         override suspend fun unlikePost(postId: Int, userToken: String) {
-            tuiterApiService.unlikePost(postId, userToken)
+            tuiterApiService.unlikePost(postId, "Bearer $userToken")
         }
     }

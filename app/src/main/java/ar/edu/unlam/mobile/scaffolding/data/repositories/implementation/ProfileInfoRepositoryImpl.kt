@@ -13,10 +13,10 @@ class ProfileInfoRepositoryImpl
         private val tuiterApiService: TuiterApiService,
     ) : ProfileInfoRepository {
         override suspend fun getCurrentProfileInfo(profileInfoRequest: ProfileInfoRequest): ProfileInfoResponse =
-            tuiterApiService.getProfileInfo(profileInfoRequest.token)
+            tuiterApiService.getProfileInfo("Bearer ${profileInfoRequest.token}")
 
         override suspend fun updateProfileInfo(
             token: String,
             profileInfoUpdateRequest: ProfileInfoUpdateRequest,
-        ): ProfileInfoResponse = tuiterApiService.updateProfile(token, profileInfoUpdateRequest)
+        ): ProfileInfoResponse = tuiterApiService.updateProfile("Bearer $token", profileInfoUpdateRequest)
     }
