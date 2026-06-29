@@ -71,6 +71,9 @@ class MainActivity : ComponentActivity() {
                                         onNavigateToCreatePost = {
                                             currentScreen = AppScreen.CREATE_NEW_POST
                                         },
+                                        onNavigateToProfile = {
+                                            currentScreen = AppScreen.EDIT_PROFILE_INFO
+                                        },
                                     )
                                 }
 

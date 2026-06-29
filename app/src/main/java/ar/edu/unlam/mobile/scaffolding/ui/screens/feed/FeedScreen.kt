@@ -33,6 +33,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
+    onNavigateToProfile: () -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
 
@@ -42,7 +43,7 @@ fun FeedScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar() },
+        bottomBar = { BottomBar(onNavigateToProfile) },
         floatingActionButton = { HomeFloatingActionButton(onNavigateToCreatePost) },
     ) { paddingValues ->
 
@@ -102,7 +103,7 @@ private fun FeedContent(
 }
 
 @Composable
-private fun BottomBar() {
+private fun BottomBar(onNavigateToProfile: () -> Unit = {}) {
     NavigationBar {
         NavigationBarItem(
             selected = true,
@@ -115,7 +116,7 @@ private fun BottomBar() {
 
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToProfile,
             icon = {
                 Icon(Icons.Default.AccountCircle, contentDescription = null)
             },
