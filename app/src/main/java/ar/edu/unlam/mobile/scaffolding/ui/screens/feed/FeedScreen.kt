@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,8 @@ fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToReply: (Int) -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
 
@@ -43,14 +46,21 @@ fun FeedScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar(onNavigateToProfile) },
+        bottomBar = { BottomBar(onNavigateToProfile, onNavigateToFavorites) },
         floatingActionButton = { HomeFloatingActionButton(onNavigateToCreatePost) },
     ) { paddingValues ->
 
         FeedContent(
             modifier = Modifier.padding(paddingValues),
             uiState,
-        ) { feedViewModel.reloadPostList() }
+            onRetry = { feedViewModel.reloadPostList() },
+            onReply = { postId -> onNavigateToReply(postId) },
+            onLike = { post ->
+                if (post.liked) feedViewModel.unlikePost(post.id)
+                else feedViewModel.likePost(post.id)
+            },
+            onAddFavorite = { post -> feedViewModel.addFavorite(post.author, post.avatarUrl) },
+        )
     }
 }
 
@@ -73,7 +83,10 @@ private fun TopBar() {
 private fun FeedContent(
     modifier: Modifier,
     uiState: UiState<List<PostResponse>>,
-    onRetryAction: () -> Unit,
+    onRetry: () -> Unit,
+    onReply: (Int) -> Unit,
+    onLike: (PostResponse) -> Unit,
+    onAddFavorite: (PostResponse) -> Unit,
 ) {
     Box(modifier) {
         when (uiState) {
@@ -86,15 +99,19 @@ private fun FeedContent(
             is UiState.Success -> {
                 LazyColumn {
                     items(uiState.data) { post ->
-
-                        PostCard(post)
+                        PostCard(
+                            post = post,
+                            onReply = { onReply(post.id) },
+                            onLike = { onLike(post) },
+                            onAddFavorite = { onAddFavorite(post) },
+                        )
                     }
                 }
             }
 
             is UiState.Error -> {
                 ShowErrorMessageOnScreen(
-                    onRetryAction,
+                    onRetry,
                     errorMessage = uiState.error,
                 )
             }
@@ -103,7 +120,10 @@ private fun FeedContent(
 }
 
 @Composable
-private fun BottomBar(onNavigateToProfile: () -> Unit = {}) {
+private fun BottomBar(
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
+) {
     NavigationBar {
         NavigationBarItem(
             selected = true,
@@ -125,11 +145,11 @@ private fun BottomBar(onNavigateToProfile: () -> Unit = {}) {
 
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToFavorites,
             icon = {
-                Icon(Icons.Default.Settings, contentDescription = null)
+                Icon(Icons.Default.Star, contentDescription = null)
             },
-            label = { BottomBarTextLabel("Ajustes") },
+            label = { BottomBarTextLabel("Favoritos") },
         )
     }
 }
