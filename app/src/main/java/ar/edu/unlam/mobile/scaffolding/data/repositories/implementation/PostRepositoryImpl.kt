@@ -40,4 +40,12 @@ class PostRepositoryImpl
         }
 
         override fun getAllDrafts(): Flow<List<Draft>> = draftDao.getAllDrafts()
+
+        override suspend fun likePost(postId: Int, userToken: String) {
+            tuiterApiService.likePost(postId, userToken)
+        }
+
+        override suspend fun unlikePost(postId: Int, userToken: String) {
+            tuiterApiService.unlikePost(postId, userToken)
+        }
     }
