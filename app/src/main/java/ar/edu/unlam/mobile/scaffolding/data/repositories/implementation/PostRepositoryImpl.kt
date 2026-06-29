@@ -8,7 +8,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
