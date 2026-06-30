@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,8 +53,11 @@ fun FeedScreen(
             onRetry = { feedViewModel.reloadPostList() },
             onReply = { postId -> onNavigateToReply(postId) },
             onLike = { post ->
-                if (post.liked) feedViewModel.unlikePost(post.id)
-                else feedViewModel.likePost(post.id)
+                if (post.liked) {
+                    feedViewModel.unlikePost(post.id)
+                } else {
+                    feedViewModel.likePost(post.id)
+                }
             },
             onAddFavorite = { post -> feedViewModel.addFavorite(post.author, post.avatarUrl) },
         )

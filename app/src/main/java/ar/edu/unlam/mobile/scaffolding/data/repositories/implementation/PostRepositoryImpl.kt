@@ -8,9 +8,9 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
 class PostRepositoryImpl
     @Inject
@@ -50,11 +50,17 @@ class PostRepositoryImpl
 
         override fun getAllDrafts(): Flow<List<Draft>> = draftDao.getAllDrafts()
 
-        override suspend fun likePost(postId: Int, userToken: String) {
+        override suspend fun likePost(
+            postId: Int,
+            userToken: String,
+        ) {
             tuiterApiService.likePost(postId, "Bearer $userToken")
         }
 
-        override suspend fun unlikePost(postId: Int, userToken: String) {
+        override suspend fun unlikePost(
+            postId: Int,
+            userToken: String,
+        ) {
             tuiterApiService.unlikePost(postId, "Bearer $userToken")
         }
     }

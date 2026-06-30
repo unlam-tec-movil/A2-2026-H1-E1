@@ -1,9 +1,9 @@
 package ar.edu.unlam.mobile.scaffolding.di.network
 
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.DraftDao
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.FavoriteDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.TuiterApiService
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.FavoriteDao
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.FavoritesRepositoryImpl
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.LoginRepositoryImpl
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.PostRepositoryImpl
@@ -63,8 +63,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideFavoritesRepositoryInstance(favoriteDao: FavoriteDao): FavoritesRepository =
-        FavoritesRepositoryImpl(favoriteDao)
+    fun provideFavoritesRepositoryInstance(favoriteDao: FavoriteDao): FavoritesRepository = FavoritesRepositoryImpl(favoriteDao)
 
     @Provides
     @Singleton

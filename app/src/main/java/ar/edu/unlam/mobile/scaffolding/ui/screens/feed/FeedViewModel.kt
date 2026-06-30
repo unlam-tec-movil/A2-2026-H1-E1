@@ -66,7 +66,10 @@ class FeedViewModel
             }
         }
 
-        fun addFavorite(author: String, avatarUrl: String) {
+        fun addFavorite(
+            author: String,
+            avatarUrl: String,
+        ) {
             viewModelScope.launch {
                 favoritesRepository.addFavorite(author, avatarUrl)
             }

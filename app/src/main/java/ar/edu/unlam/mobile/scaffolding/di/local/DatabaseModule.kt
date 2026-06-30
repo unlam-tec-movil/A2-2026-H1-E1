@@ -17,9 +17,11 @@ object DatabaseModule {
     @Provides
     fun provideRoomDatabase(
         @ApplicationContext context: Context,
-    ): AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, "tuiter_db")
-        .fallbackToDestructiveMigration()
-        .build()
+    ): AppDatabase =
+        Room
+            .databaseBuilder(context, AppDatabase::class.java, "tuiter_db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideDraftDao(database: AppDatabase): DraftDao = database.getDraftDao()

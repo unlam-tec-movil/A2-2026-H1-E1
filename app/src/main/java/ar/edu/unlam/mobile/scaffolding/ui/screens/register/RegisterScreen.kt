@@ -1,7 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.register
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,24 +82,27 @@ fun ShowRegisterForm(
     onResetClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PADDING_LARGE)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(PADDING_LARGE)
+                    .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(PADDING_LARGE))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(PADDING_LARGE),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(PADDING_LARGE))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(PADDING_LARGE),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -169,12 +171,13 @@ private fun ShowRegisterErrorScreen(
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PADDING_LARGE)
-                .clip(RoundedCornerShape(PADDING_LARGE))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(PADDING_LARGE),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(PADDING_LARGE)
+                    .clip(RoundedCornerShape(PADDING_LARGE))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(PADDING_LARGE),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(

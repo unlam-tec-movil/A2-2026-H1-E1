@@ -11,7 +11,10 @@ class FavoritesRepositoryImpl
     constructor(
         private val favoriteDao: FavoriteDao,
     ) : FavoritesRepository {
-        override suspend fun addFavorite(author: String, avatarUrl: String) {
+        override suspend fun addFavorite(
+            author: String,
+            avatarUrl: String,
+        ) {
             favoriteDao.insert(FavoriteUser(author, avatarUrl))
         }
 

@@ -20,7 +20,13 @@ interface PostRepository {
 
     fun getAllDrafts(): Flow<List<Draft>>
 
-    suspend fun likePost(postId: Int, userToken: String)
+    suspend fun likePost(
+        postId: Int,
+        userToken: String,
+    )
 
-    suspend fun unlikePost(postId: Int, userToken: String)
+    suspend fun unlikePost(
+        postId: Int,
+        userToken: String,
+    )
 }
