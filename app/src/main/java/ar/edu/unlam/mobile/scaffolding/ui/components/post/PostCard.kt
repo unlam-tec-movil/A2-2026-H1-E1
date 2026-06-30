@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.AVATAR_SIZE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
@@ -36,7 +35,12 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDI
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 
 @Composable
-fun PostCard(post: PostResponse) {
+fun PostCard(
+    post: PostResponse,
+    onReply: () -> Unit = {},
+    onLike: () -> Unit = {},
+    onAddFavorite: () -> Unit = {},
+) {
     Row(
         modifier =
             Modifier
@@ -70,7 +74,13 @@ fun PostCard(post: PostResponse) {
                 MaterialTheme.colorScheme.onSurface,
             )
 
-            PostActions(post.likes)
+            PostActions(
+                likes = post.likes,
+                liked = post.liked,
+                onReply = onReply,
+                onLike = onLike,
+                onAddFavorite = onAddFavorite,
+            )
         }
     }
 }
@@ -108,52 +118,42 @@ private fun PostText(
 }
 
 @Composable
-private fun PostActions(likes: Int) {
+private fun PostActions(
+    likes: Int,
+    liked: Boolean,
+    onReply: () -> Unit,
+    onLike: () -> Unit,
+    onAddFavorite: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            modifier = Modifier.padding(PADDING_SMALL),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL),
         ) {
-            IconButton(
-                onClick = {},
-            ) {
-                Icon(Icons.Default.Favorite, contentDescription = null)
+            IconButton(onClick = onLike) {
+                Icon(
+                    if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Me gusta",
+                    tint = if (liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Text(
-                text = "$likes ${stringResource(R.string.post_likes_label)}",
+                text = "$likes",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        Row(
-            modifier = Modifier.padding(PADDING_SMALL),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL),
-        ) {
-            IconButton(
-                onClick = {},
-            ) {
-                Icon(Icons.Default.AddComment, contentDescription = null)
-            }
-
-            Text(
-                text = stringResource(R.string.post_comments_label),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        IconButton(onClick = onReply) {
+            Icon(Icons.Default.Replay, contentDescription = "Responder")
         }
 
-        IconButton(
-            onClick = {},
-        ) {
-            Icon(Icons.Default.Share, contentDescription = null)
+        IconButton(onClick = onAddFavorite) {
+            Icon(Icons.Default.StarBorder, contentDescription = "Agregar a favoritos")
         }
     }
 }

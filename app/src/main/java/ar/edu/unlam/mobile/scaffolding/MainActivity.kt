@@ -11,18 +11,22 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.favorites.FavoritesScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.favorites.FavoritesViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             var currentScreen by remember { mutableStateOf(AppScreen.LOGIN) }
+            var replyPostId by remember { mutableIntStateOf(0) }
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
@@ -67,9 +72,19 @@ class MainActivity : ComponentActivity() {
 
                                 AppScreen.FEED -> {
                                     FeedScreen(
-                                        hiltViewModel(),
+                                        feedViewModel = hiltViewModel(),
                                         onNavigateToCreatePost = {
                                             currentScreen = AppScreen.CREATE_NEW_POST
+                                        },
+                                        onNavigateToProfile = {
+                                            currentScreen = AppScreen.EDIT_PROFILE_INFO
+                                        },
+                                        onNavigateToReply = { postId ->
+                                            replyPostId = postId
+                                            currentScreen = AppScreen.REPLY_POST
+                                        },
+                                        onNavigateToFavorites = {
+                                            currentScreen = AppScreen.FAVORITES
                                         },
                                     )
                                 }
@@ -89,10 +104,33 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
+                                AppScreen.REPLY_POST -> {
+                                    ReplyScreen(
+                                        parentPostId = replyPostId,
+                                        postCreationViewModel = hiltViewModel(),
+                                        onPostAction = { currentScreen = AppScreen.FEED },
+                                        onCancelAction = { currentScreen = AppScreen.FEED },
+                                        onShowSnackbar = { message ->
+                                            launchSnackBarCoroutine(
+                                                snackbarHostState,
+                                                message,
+                                                coroutineScope,
+                                            )
+                                        },
+                                    )
+                                }
+
                                 AppScreen.EDIT_PROFILE_INFO -> {
                                     ProfileScreen(hiltViewModel()) {
                                         currentScreen = AppScreen.FEED
                                     }
+                                }
+
+                                AppScreen.FAVORITES -> {
+                                    FavoritesScreen(
+                                        favoritesViewModel = hiltViewModel<FavoritesViewModel>(),
+                                        onBack = { currentScreen = AppScreen.FEED },
+                                    )
                                 }
                             }
                         }

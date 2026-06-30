@@ -1,9 +1,8 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.register
 
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.NetworkObject
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.register.RegisterRequest
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.register.RegisterResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.RegisterRepository
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.BLANK_FIELDS_ERROR_MESSAGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.UNKNOWN_ERROR_MESSAGE
@@ -20,8 +19,8 @@ class RegisterViewModel
     @Inject
     constructor(
         private val registerRepository: RegisterRepository,
-    ) : BaseViewModel<String>(),
-        NetworkObject<RegisterRequest, RegisterResponse> {
+        private val tokenManager: TokenManager,
+    ) : BaseViewModel<String>() {
         private val _name = MutableStateFlow("")
         val name: StateFlow<String> = _name.asStateFlow()
 
@@ -35,21 +34,18 @@ class RegisterViewModel
             viewModelScope.launch {
                 if (name.value.isBlank() || email.value.isBlank() || password.value.isBlank()) {
                     setUiAsError(BLANK_FIELDS_ERROR_MESSAGE)
-
                     return@launch
                 }
 
                 setUiAsLoading()
 
                 try {
-                    val request = createRequestObject()
-
-                    val response = createReponseObject(request)
-
+                    val request = RegisterRequest(_name.value, _email.value, _password.value)
+                    val response = registerRepository.register(request)
+                    tokenManager.saveToken(response.token)
                     setUiAsSuccess(response.token)
                 } catch (exception: Exception) {
                     val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
-
                     setUiAsError(responseMessage)
                 }
             }
@@ -73,11 +69,7 @@ class RegisterViewModel
             _password.value = ""
         }
 
-        fun setUiStateAsIdle() {
-            setUiStateAsIdle()
+        fun restoreStatus() {
+            setUiAsIdle()
         }
-
-        override suspend fun createRequestObject(): RegisterRequest = RegisterRequest(_name.value, _email.value, _password.value)
-
-        override suspend fun createReponseObject(request: RegisterRequest): RegisterResponse = registerRepository.register(request)
     }
