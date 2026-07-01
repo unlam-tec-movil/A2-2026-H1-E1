@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
 import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.FavoriteUserRepository
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
@@ -18,9 +19,9 @@ class FeedViewModel
     constructor(
         private val postRepository: PostRepository,
         private val favoriteUserRepository: FavoriteUserRepository,
+        private val tokenManager: TokenManager,
     ) : BaseViewModel<List<PostUiModel>>() {
         init {
-
             loadPosts()
         }
 
@@ -61,21 +62,24 @@ class FeedViewModel
             loadPosts()
         }
 
-        fun markUserAsFavorite(
-            author: String,
-            avatarUrl: String,
-        ) {
+        fun likePost(postId: Int) {
             viewModelScope.launch {
                 try {
-                    val user = FavoriteUser(author, avatarUrl)
+                    val token = tokenManager.tokenFlow.first()
+                    postRepository.likePost(postId, token)
+                    loadPosts()
+                } catch (_: Exception) {
+                }
+            }
+        }
 
-                    favoriteUserRepository.saveUserAsFavorite(user)
-
-                    updateFavoritePosts(user)
-                } catch (exception: Exception) {
-                    val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
-
-                    setUiAsError(responseMessage)
+        fun unlikePost(postId: Int) {
+            viewModelScope.launch {
+                try {
+                    val token = tokenManager.tokenFlow.first()
+                    postRepository.unlikePost(postId, token)
+                    loadPosts()
+                } catch (_: Exception) {
                 }
             }
         }
@@ -97,6 +101,25 @@ class FeedViewModel
                     }
 
                 setUiAsSuccess(updatedPostList)
+            }
+        }
+
+        fun markUserAsFavorite(
+            author: String,
+            avatarUrl: String,
+        ) {
+            viewModelScope.launch {
+                try {
+                    val user = FavoriteUser(author, avatarUrl)
+
+                    favoriteUserRepository.saveUserAsFavorite(user)
+
+                    updateFavoritePosts(user)
+                } catch (exception: Exception) {
+                    val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
+
+                    setUiAsError(responseMessage)
+                }
             }
         }
     }

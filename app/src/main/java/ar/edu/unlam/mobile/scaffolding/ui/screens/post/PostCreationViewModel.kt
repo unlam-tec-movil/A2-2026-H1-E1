@@ -3,9 +3,7 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens.post
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.Draft
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.NetworkObject
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationRequest
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.DRAFT_SAVED
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.UNKNOWN_ERROR_MESSAGE
@@ -24,20 +22,20 @@ class PostCreationViewModel
     constructor(
         private val postRepository: PostRepository,
         private val tokenManager: TokenManager,
-    ) : BaseViewModel<String>(),
-        NetworkObject<PostCreationRequest, PostCreationResponse> {
-        @Suppress("ktlint:standard:backing-property-naming")
-        private val _draftId: MutableStateFlow<Int> = MutableStateFlow(0)
+    ) : BaseViewModel<String>() {
+        private var parentId: Int = 0
 
         private val _message = MutableStateFlow("")
         val message: StateFlow<String> = _message.asStateFlow()
 
         init {
-
             viewModelScope.launch {
-
                 checkAndLoadLastDraft()
             }
+        }
+
+        fun setParentId(id: Int) {
+            parentId = id
         }
 
         fun createPost() {
@@ -45,16 +43,13 @@ class PostCreationViewModel
                 setUiAsLoading()
 
                 try {
-                    val request = createRequestObject()
-
-                    val response = createReponseObject(request)
-
+                    val token = tokenManager.tokenFlow.first()
+                    val request = PostCreationRequest(_message.value, parentId)
+                    val response = postRepository.createNewPost(request, token)
                     setUiAsSuccess(response.message)
-
                     checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {
                     val responseErrorMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
-
                     setUiAsError(responseErrorMessage)
                 }
             }
@@ -62,23 +57,21 @@ class PostCreationViewModel
 
         private suspend fun checkAndLoadLastDraft() {
             postRepository.getAllDrafts().collect { drafts ->
-                _draftId.value = drafts.lastOrNull()?.postId ?: 0
                 _message.value = drafts.lastOrNull()?.postMessage ?: ""
             }
         }
 
         private suspend fun checkAndDeleteDraftIfNeeded() {
-            if (_draftId.value > 0) {
-                postRepository.deleteDraft(_draftId.value)
+            postRepository.getAllDrafts().collect { drafts ->
+                val lastId = drafts.lastOrNull()?.postId ?: 0
+                if (lastId > 0) postRepository.deleteDraft(lastId)
+                return@collect
             }
         }
 
         fun createDraft(draftMessage: String) {
             viewModelScope.launch {
-                val draft = Draft(postMessage = draftMessage)
-
-                postRepository.saveDraft(draft)
-
+                postRepository.saveDraft(Draft(postMessage = draftMessage))
                 setUiAsSuccess(DRAFT_SAVED)
             }
         }
@@ -90,9 +83,4 @@ class PostCreationViewModel
         fun restoreStatus() {
             setUiAsIdle()
         }
-
-        override suspend fun createRequestObject(): PostCreationRequest = PostCreationRequest(_message.value)
-
-        override suspend fun createReponseObject(request: PostCreationRequest): PostCreationResponse =
-            postRepository.createNewPost(request, tokenManager.tokenFlow.first())
     }
