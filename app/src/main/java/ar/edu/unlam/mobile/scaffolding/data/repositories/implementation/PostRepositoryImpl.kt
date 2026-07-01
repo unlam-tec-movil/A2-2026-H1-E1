@@ -1,8 +1,8 @@
 package ar.edu.unlam.mobile.scaffolding.data.repositories.implementation
 
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.Draft
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.DraftDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.Draft
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.DraftDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.TuiterApiService
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse

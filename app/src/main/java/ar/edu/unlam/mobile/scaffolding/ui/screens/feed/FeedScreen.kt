@@ -21,7 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
@@ -49,7 +48,9 @@ fun FeedScreen(
         FeedContent(
             modifier = Modifier.padding(paddingValues),
             uiState,
-        ) { feedViewModel.reloadPostList() }
+            { feedViewModel.reloadPostList() },
+            { author, avatarUrl -> feedViewModel.markUserAsFavorite(author, avatarUrl) },
+        )
     }
 }
 
@@ -71,8 +72,9 @@ private fun TopBar() {
 @Composable
 private fun FeedContent(
     modifier: Modifier,
-    uiState: UiState<List<PostResponse>>,
+    uiState: UiState<List<PostUiModel>>,
     onRetryAction: () -> Unit,
+    onSelectedAsFavoriteAction: (String, String) -> Unit,
 ) {
     Box(modifier) {
         when (uiState) {
@@ -86,7 +88,13 @@ private fun FeedContent(
                 LazyColumn {
                     items(uiState.data) { post ->
 
-                        PostCard(post)
+                        val apiResponse = post.apiPostResponse
+                        val markedAsFavoriteValue = post.isMarkedAsFavorite
+
+                        PostCard(
+                            apiResponse,
+                            markedAsFavoriteValue,
+                        ) { onSelectedAsFavoriteAction(apiResponse.author, apiResponse.avatarUrl) }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.data.datasources.local
+package ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao
 
 import androidx.room.Dao
 import androidx.room.Entity

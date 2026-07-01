@@ -28,4 +28,5 @@
     <string name="at_least_1_lowercase">• Al menos una letra minúscula</string>
     <string name="at_least_1_digit">• Al menos un número</string>
     <string name="at_least_1_special_character">•Al menos un carácter especial</string>
+    <string name="favorite_users_screen_title">Usuarios favoritos</string>
 </resources>

@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
@@ -93,6 +94,10 @@ class MainActivity : ComponentActivity() {
                                     ProfileScreen(hiltViewModel()) {
                                         currentScreen = AppScreen.FEED
                                     }
+                                }
+
+                                AppScreen.USERS_MARKED_AS_FAVORITE -> {
+                                    FavoriteUserScreen(hiltViewModel())
                                 }
                             }
                         }

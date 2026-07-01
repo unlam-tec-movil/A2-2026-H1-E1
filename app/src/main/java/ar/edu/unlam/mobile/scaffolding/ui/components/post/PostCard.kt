@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.AVATAR_SIZE
@@ -36,7 +39,11 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDI
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 
 @Composable
-fun PostCard(post: PostResponse) {
+fun PostCard(
+    post: PostResponse,
+    isSelectedAsFavorite: Boolean,
+    onSelectedAsFavoriteAction: () -> Unit,
+) {
     Row(
         modifier =
             Modifier
@@ -49,7 +56,7 @@ fun PostCard(post: PostResponse) {
 
         Spacer(modifier = Modifier.width(PADDING_MEDIUM))
 
-        Column(verticalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
+        Column(verticalArrangement = Arrangement.spacedBy(PADDING_SMALL), modifier = Modifier.padding(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
                 PostText(
                     post.author,
@@ -62,6 +69,12 @@ fun PostCard(post: PostResponse) {
                     MaterialTheme.typography.bodyMedium,
                     MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                IconButton(onClick = onSelectedAsFavoriteAction) {
+                    Icon(imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Outlined.Star, contentDescription = null)
+                }
             }
 
             PostText(
@@ -103,7 +116,7 @@ private fun PostText(
         text = textToShow,
         style = textStyle,
         color = textColor,
-        modifier = Modifier.padding(PADDING_MEDIUM),
+        modifier = Modifier.padding(PADDING_SMALL),
     )
 }
 
