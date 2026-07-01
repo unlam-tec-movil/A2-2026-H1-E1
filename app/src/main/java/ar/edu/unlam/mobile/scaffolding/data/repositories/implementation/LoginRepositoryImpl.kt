@@ -11,10 +11,5 @@ class LoginRepositoryImpl
     constructor(
         private val tuiterApiService: TuiterApiService,
     ) : LoginRepository {
-        override suspend fun login(loginRequest: LoginRequest): LoginResponse =
-            try {
-                tuiterApiService.login(loginRequest)
-            } catch (_: Exception) {
-                LoginResponse("mock-token-para-offline")
-            }
+        override suspend fun login(loginRequest: LoginRequest): LoginResponse = tuiterApiService.login(loginRequest)
     }

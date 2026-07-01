@@ -4,8 +4,6 @@
     <string name="email_label">Correo electrónico</string>
     <string name="password_label">Contraseña</string>
     <string name="login_loading_indicator_label">Cargando…</string>
-    <string name="login_error_label">Ocurrió un error al iniciar sesión</string>
-    <string name="login_error_status_code">Código de estado:</string>
     <string name="retry_label">Reintentar</string>
     <string name="sign_in">Iniciar sesión</string>
     <string name="not_user_yet">¿No tienes cuenta aún?</string>
@@ -15,8 +13,6 @@
     <string name="confirm">Confirmar datos</string>
     <string name="reset_form">Limpiar campos</string>
     <string name="user_creation_error_label">Ocurrió un error al crear el usuario</string>
-    <string name="post_likes_label">Me gusta</string>
-    <string name="post_comments_label">Comentarios</string>
     <string name="user_profile_title_label">Perfil de usuario</string>
     <string name="edit_user_name_prompt_text">Nuevo nombre de usuario</string>
     <string name="edit_user_email_prompt_text">Nuevo email</string>
