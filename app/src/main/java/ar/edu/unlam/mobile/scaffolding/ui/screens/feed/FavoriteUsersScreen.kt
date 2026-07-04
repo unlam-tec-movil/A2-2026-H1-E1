@@ -64,7 +64,11 @@ fun FavoriteUserScreen(
         }
 
         is UiState.Success -> {
-            ShowFavoriteUsersScreen(state.data)
+            ShowFavoriteUsersScreen(state.data) { author ->
+                favoriteUsersViemodel.deleteFromFavoritesByAuthor(
+                    author,
+                )
+            }
         }
 
         is UiState.Error -> {
@@ -77,7 +81,10 @@ fun FavoriteUserScreen(
 }
 
 @Composable
-fun ShowFavoriteUsersScreen(favoriteUsers: List<FavoriteUser>) {
+fun ShowFavoriteUsersScreen(
+    favoriteUsers: List<FavoriteUser>,
+    onRemoveFromFavoritesAction: (String) -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -111,7 +118,8 @@ fun ShowFavoriteUsersScreen(favoriteUsers: List<FavoriteUser>) {
             ) {
                 LazyColumn {
                     items(favoriteUsers) { user ->
-                        FavoriteUserCard(user)
+                        val author = user.author
+                        FavoriteUserCard(user) { onRemoveFromFavoritesAction(author) }
                     }
                 }
             }
@@ -121,7 +129,10 @@ fun ShowFavoriteUsersScreen(favoriteUsers: List<FavoriteUser>) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun FavoriteUserCard(user: FavoriteUser) {
+private fun FavoriteUserCard(
+    user: FavoriteUser,
+    onRemoveFromFavoritesAction: (String) -> Unit,
+) {
     Row(
         modifier =
             Modifier
@@ -157,7 +168,7 @@ private fun FavoriteUserCard(user: FavoriteUser) {
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(
-            onClick = {},
+            onClick = { onRemoveFromFavoritesAction(user.author) },
         ) {
             Icon(Icons.Default.DeleteOutline, contentDescription = null)
         }
@@ -174,6 +185,7 @@ private fun FavoriteUsersScreenPreview() {
                     FavoriteUser(author = "Usuario1", avatarUrl = ""),
                     FavoriteUser(author = "Usuario2", avatarUrl = ""),
                 ),
+            onRemoveFromFavoritesAction = {},
         )
     }
 }

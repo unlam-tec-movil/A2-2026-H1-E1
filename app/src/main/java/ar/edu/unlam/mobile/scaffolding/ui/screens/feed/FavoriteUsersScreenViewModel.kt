@@ -37,5 +37,20 @@ class FavoriteUsersScreenViewModel
             }
         }
 
+        fun deleteFromFavoritesByAuthor(author: String) {
+            viewModelScope.launch {
+                setUiAsLoading()
+
+                try {
+                    favoriteUserRepository.deleteUserFromFavorites(author)
+                    val favoritesUsers = getFirstItemOnFavoritesUsersFlow()
+                    setUiAsSuccess(favoritesUsers)
+                } catch (exception: Exception) {
+                    val responseError = exception.message ?: UNKNOWN_ERROR_MESSAGE
+                    setUiAsError(responseError)
+                }
+            }
+        }
+
         private suspend fun getFirstItemOnFavoritesUsersFlow(): List<FavoriteUser> = favoriteUserRepository.getAllFavoriteUsers().first()
     }
