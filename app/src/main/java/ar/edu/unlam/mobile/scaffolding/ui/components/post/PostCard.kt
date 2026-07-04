@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,12 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.AVATAR_SIZE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
+import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 @Composable
 fun PostCard(
@@ -44,51 +47,60 @@ fun PostCard(
     onReply: () -> Unit = {},
     onLike: () -> Unit = {},
 ) {
-    Row(
+    Surface(
         modifier =
             Modifier
                 .padding(PADDING_MEDIUM)
-                .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(PADDING_LARGE))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .fillMaxWidth(),
+        shape = RoundedCornerShape(PADDING_LARGE),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 4.dp,
     ) {
-        PostAvatar()
+        Row(modifier = Modifier.padding(PADDING_MEDIUM)) {
+            PostAvatar()
 
-        Spacer(modifier = Modifier.width(PADDING_MEDIUM))
+            Spacer(modifier = Modifier.width(PADDING_MEDIUM))
 
-        Column(verticalArrangement = Arrangement.spacedBy(PADDING_SMALL), modifier = Modifier.padding(8.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(PADDING_SMALL),
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
+                    PostText(
+                        post.author,
+                        MaterialTheme.typography.titleMedium,
+                        MaterialTheme.colorScheme.onSurface,
+                    )
+
+                    PostText(
+                        "@usuario",
+                        MaterialTheme.typography.bodyMedium,
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    IconButton(onClick = onSelectedAsFavoriteAction) {
+                        Icon(
+                            imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Outlined.Star,
+                            contentDescription = null,
+                        )
+                    }
+                }
+
                 PostText(
-                    post.author,
-                    MaterialTheme.typography.titleMedium,
+                    post.message,
+                    MaterialTheme.typography.bodyMedium,
                     MaterialTheme.colorScheme.onSurface,
                 )
 
-                PostText(
-                    "@usuario",
-                    MaterialTheme.typography.bodyMedium,
-                    MaterialTheme.colorScheme.onSurfaceVariant,
+                PostActions(
+                    likes = post.likes,
+                    liked = post.liked,
+                    onReply = onReply,
+                    onLike = onLike,
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = onSelectedAsFavoriteAction) {
-                    Icon(imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Outlined.Star, contentDescription = null)
-                }
             }
-
-            PostText(
-                post.message,
-                MaterialTheme.typography.bodyMedium,
-                MaterialTheme.colorScheme.onSurface,
-            )
-
-            PostActions(
-                likes = post.likes,
-                liked = post.liked,
-                onReply = onReply,
-                onLike = onLike,
-            )
         }
     }
 }
@@ -158,5 +170,30 @@ private fun PostActions(
         IconButton(onClick = onReply) {
             Icon(Icons.Default.Replay, contentDescription = "Responder")
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PostCardPreview() {
+    ScaffoldingV2Theme {
+        PostCard(
+            post =
+                PostResponse(
+                    id = 1,
+                    author = "Usuario",
+                    message = "Este es un post de ejemplo",
+                    likes = 5,
+                    liked = false,
+                    avatarUrl = "tomas.com",
+                    parentId = 10,
+                    authorId = 7,
+                    date = "2026-1-1",
+                ),
+            isSelectedAsFavorite = false,
+            onSelectedAsFavoriteAction = {},
+            onReply = {},
+            onLike = {},
+        )
     }
 }

@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,18 +15,19 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
@@ -37,6 +37,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDI
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
+import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 @Composable
 fun ProfileScreen(
@@ -89,68 +90,73 @@ fun ShowProfileForm(
     profileInfoViewModel: ProfileInfoViewModel,
     isSavingStatus: Boolean,
 ) {
-    Column(
+    Surface(
         modifier =
             Modifier
                 .padding(PADDING_MEDIUM)
-                .background(MaterialTheme.colorScheme.surface)
-                .clip(RoundedCornerShape(PADDING_MEDIUM))
                 .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        shape = RoundedCornerShape(PADDING_MEDIUM),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 4.dp,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            IconButton(
-                onClick = onReturnClickAction,
-                modifier = Modifier.padding(PADDING_MEDIUM),
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = null)
+                IconButton(
+                    onClick = onReturnClickAction,
+                    modifier = Modifier.padding(PADDING_MEDIUM),
+                ) {
+                    Icon(Icons.Default.ChevronLeft, contentDescription = null)
+                }
+
+                Text(
+                    text = stringResource(R.string.user_profile_title_label),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
 
-            Text(
-                text = stringResource(R.string.user_profile_title_label),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+            Column(
+                modifier =
+                    Modifier
+                        .padding(PADDING_MEDIUM)
+                        .fillMaxSize()
+                        .border(
+                            shape = RoundedCornerShape(PADDING_MEDIUM),
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+            ) {
+                UserNameTextfield(
+                    currentName,
+                ) { newUserName -> profileInfoViewModel.onNameChange(newUserName) }
 
-        Column(
-            modifier =
-                Modifier
-                    .padding(PADDING_MEDIUM)
-                    .fillMaxSize()
-                    .border(
-                        shape = RoundedCornerShape(PADDING_MEDIUM),
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-        ) {
-            UserNameTextfield(
-                currentName,
-            ) { newUserName -> profileInfoViewModel.onNameChange(newUserName) }
+                EmailTextfield(
+                    currentEmail,
+                ) { newEmail -> profileInfoViewModel.onEmailChange(newEmail) }
 
-            EmailTextfield(
-                currentEmail,
-            ) { newEmail -> profileInfoViewModel.onEmailChange(newEmail) }
+                ShowPasswordHelp()
 
-            ShowPasswordHelp()
+                PasswordTextfields(
+                    newPassword,
+                    newConfirmPassword,
+                    { newPassword -> profileInfoViewModel.onNewPasswordChange(newPassword) },
+                    { confirmNewPassword ->
+                        profileInfoViewModel.onNewPasswordConfirmChange(
+                            confirmNewPassword,
+                        )
+                    },
+                )
 
-            PasswordTextfields(
-                newPassword,
-                newConfirmPassword,
-                { newPassword -> profileInfoViewModel.onNewPasswordChange(newPassword) },
-                { confirmNewPassword ->
-                    profileInfoViewModel.onNewPasswordConfirmChange(
-                        confirmNewPassword,
-                    )
-                },
-            )
-
-            ConfirmChangesButton({ profileInfoViewModel.sendProfileInfoUpdate() }, isSavingStatus)
+                ConfirmChangesButton({ profileInfoViewModel.sendProfileInfoUpdate() }, isSavingStatus)
+            }
         }
     }
 }
@@ -189,21 +195,19 @@ fun EmailTextfield(
 
 @Composable
 fun ShowPasswordHelp() {
-    Column(
-        modifier =
-            Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(PADDING_MEDIUM)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    shape = RoundedCornerShape(PADDING_MEDIUM),
-                ).clip(shape = RoundedCornerShape(PADDING_MEDIUM))
-                .fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start,
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
+        shape = RoundedCornerShape(PADDING_MEDIUM),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 1.dp,
     ) {
-        ShowPasswordRequirementsList()
+        Column(
+            modifier = Modifier.padding(PADDING_MEDIUM),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            ShowPasswordRequirementsList()
+        }
     }
 }
 
@@ -312,4 +316,12 @@ fun ConfirmChangesButton(
         modifier = Modifier.padding(PADDING_SMALL),
         isEnabled = !enabledStatus,
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PasswordHelpPreview() {
+    ScaffoldingV2Theme {
+        ShowPasswordHelp()
+    }
 }

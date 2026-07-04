@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,11 +17,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
@@ -28,6 +31,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnS
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
+import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 @Composable
 fun FeedScreen(
@@ -77,6 +81,11 @@ private fun TopBar() {
                 color = MaterialTheme.colorScheme.primary,
             )
         },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ),
         modifier = Modifier.padding(PADDING_MEDIUM),
     )
 }
@@ -90,7 +99,10 @@ private fun FeedContent(
     onReply: (Int) -> Unit,
     onLike: (PostResponse) -> Unit,
 ) {
-    Box(modifier) {
+    Box(
+        modifier =
+            modifier.background(MaterialTheme.colorScheme.background),
+    ) {
         when (uiState) {
             is UiState.Idle -> {}
 
@@ -168,4 +180,53 @@ private fun BottomBarTextLabel(textToShow: String) {
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface,
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FeedContentPreview() {
+    val samplePosts =
+        listOf(
+            PostUiModel(
+                apiPostResponse =
+                    PostResponse(
+                        id = 1,
+                        author = "Usuario1",
+                        message = "Este es un post de ejemplo para la preview del feed",
+                        likes = 10,
+                        liked = false,
+                        avatarUrl = "",
+                        parentId = 0,
+                        authorId = 1,
+                        date = "2024-01-01",
+                    ),
+                isMarkedAsFavorite = false,
+            ),
+            PostUiModel(
+                apiPostResponse =
+                    PostResponse(
+                        id = 2,
+                        author = "Usuario2",
+                        message = "Otro post interesante en el feed",
+                        likes = 5,
+                        liked = true,
+                        avatarUrl = "",
+                        parentId = 0,
+                        authorId = 2,
+                        date = "2024-01-02",
+                    ),
+                isMarkedAsFavorite = true,
+            ),
+        )
+
+    ScaffoldingV2Theme {
+        FeedContent(
+            modifier = Modifier.padding(PADDING_MEDIUM),
+            uiState = UiState.Success(samplePosts),
+            onRetryAction = {},
+            onSelectedAsFavoriteAction = { _, _ -> },
+            onReply = {},
+            onLike = {},
+        )
+    }
 }
