@@ -60,14 +60,14 @@ interface TuiterApiService {
         @Body profileUpdateRequest: ProfileInfoUpdateRequest,
     ): ProfileInfoResponse
 
-    @POST("api/v1/me/tuits/{id}/like")
+    @POST("api/v1/me/tuits/{tuit_id}/likes")
     @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun likePost(
-        @Path("id") postId: Int,
+        @Path("tuit_id") postId: Int,
         @Header("Authorization") userToken: String,
     )
 
-    @DELETE("api/v1/me/tuits/{id}/like")
+    @DELETE("api/v1/me/tuits/{id}/likes")
     @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun unlikePost(
         @Path("id") postId: Int,
