@@ -5,8 +5,8 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.DraftDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUserDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.TuiterApiService
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.FavoriteUserRepositoryImpl
-import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.MockLoginRepositoryImpl
-import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.MockPostRepositoryImpl
+import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.LoginRepositoryImpl
+import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.PostRepositoryImpl
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.ProfileInfoRepositoryImpl
 import ar.edu.unlam.mobile.scaffolding.data.repositories.implementation.RegisterRepositoryImpl
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.FavoriteUserRepository
@@ -42,8 +42,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideLoginRepositoryInstance(tuiterApiService: TuiterApiService): LoginRepository = MockLoginRepositoryImpl()
-    // LoginRepositoryImpl(tuiterApiService)
+    fun provideLoginRepositoryInstance(tuiterApiService: TuiterApiService): LoginRepository = LoginRepositoryImpl(tuiterApiService)
 
     @Provides
     @Singleton
@@ -55,8 +54,7 @@ object NetworkModule {
         tuiterApiService: TuiterApiService,
         tokenManager: TokenManager,
         draftDao: DraftDao,
-    ): PostRepository = MockPostRepositoryImpl()
-    // PostRepositoryImpl(tuiterApiService, tokenManager, draftDao)
+    ): PostRepository = PostRepositoryImpl(tuiterApiService, tokenManager, draftDao)
 
     @Provides
     @Singleton
