@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardDefaults.cardElevation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,8 +46,15 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 
 @Composable
-fun FavoriteUserScreen(favoriteUsersViemodel: FavoriteUsersScreenViewModel) {
+fun FavoriteUserScreen(
+    favoriteUsersViemodel: FavoriteUsersScreenViewModel,
+    onBackAction: () -> Unit,
+) {
     val uiState by favoriteUsersViemodel.uiState.collectAsState()
+
+    BackHandler {
+        onBackAction()
+    }
 
     when (val state = uiState) {
         is UiState.Idle -> {}
@@ -73,7 +85,12 @@ fun ShowFavoriteUsersScreen(favoriteUsers: List<FavoriteUser>) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(PADDING_MEDIUM),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = PADDING_MEDIUM)) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PADDING_MEDIUM),
+        ) {
             TuiterTextLabel(
                 R.string.favorite_users_screen_title,
                 textStyle = MaterialTheme.typography.titleLarge,
@@ -124,7 +141,10 @@ private fun FavoriteUserCard(user: FavoriteUser) {
             GlideImage(
                 model = user.avatarUrl,
                 contentDescription = null,
-                modifier = Modifier.size(AVATAR_SIZE).clip(CircleShape),
+                modifier =
+                    Modifier
+                        .size(AVATAR_SIZE)
+                        .clip(CircleShape),
             )
         }
 
@@ -135,6 +155,12 @@ private fun FavoriteUserCard(user: FavoriteUser) {
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(
+            onClick = {},
+        ) {
+            Icon(Icons.Default.DeleteOutline, contentDescription = null)
+        }
     }
 }
 

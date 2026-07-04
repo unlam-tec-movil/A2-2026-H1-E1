@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.profile
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,11 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,7 +41,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 @Composable
 fun ProfileScreen(
     profileInfoViewModel: ProfileInfoViewModel,
-    onReturnClickAction: () -> Unit,
+    onNavigateBackAction: () -> Unit,
 ) {
     val uiState by profileInfoViewModel.uiState.collectAsState()
     val currentName by profileInfoViewModel.name.collectAsState()
@@ -54,6 +51,10 @@ fun ProfileScreen(
     val newConfirmPassword by profileInfoViewModel.newPasswordConfirm.collectAsState()
     val isSavingStatus by profileInfoViewModel.isSaving.collectAsState()
 
+    BackHandler {
+        onNavigateBackAction()
+    }
+
     when (val state = uiState) {
         is UiState.Loading -> {
             ShowLoadingStatusOnScreen()
@@ -61,7 +62,7 @@ fun ProfileScreen(
 
         is UiState.Error -> {
             ShowErrorMessageOnScreen(
-                onReturnClickAction,
+                onNavigateBackAction,
                 state.error,
             )
         }
@@ -72,7 +73,6 @@ fun ProfileScreen(
                 currentEmail,
                 newPassword,
                 newConfirmPassword,
-                onReturnClickAction,
                 profileInfoViewModel,
                 isSavingStatus,
             )
@@ -88,7 +88,6 @@ fun ShowProfileForm(
     currentEmail: String,
     newPassword: String,
     newConfirmPassword: String,
-    onReturnClickAction: () -> Unit,
     profileInfoViewModel: ProfileInfoViewModel,
     isSavingStatus: Boolean,
 ) {
@@ -111,13 +110,6 @@ fun ShowProfileForm(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                IconButton(
-                    onClick = onReturnClickAction,
-                    modifier = Modifier.padding(PADDING_MEDIUM),
-                ) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = null)
-                }
-
                 Text(
                     text = stringResource(R.string.user_profile_title_label),
                     style = MaterialTheme.typography.titleLarge,
@@ -328,10 +320,45 @@ fun ConfirmChangesButton(
     )
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun PasswordHelpPreview() {
+private fun ProfileScreenPreview() {
     ScaffoldingV2Theme {
-        ShowPasswordHelp()
+        Surface(
+            modifier = Modifier.fillMaxSize().padding(PADDING_MEDIUM),
+            shape = RoundedCornerShape(PADDING_MEDIUM),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp,
+            shadowElevation = 4.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(PADDING_MEDIUM).fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Perfil",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+
+                UserNameTextfield(currentName = "Usuario Ejemplo") {}
+                EmailTextfield(currentEmail = "usuario@email.com") {}
+                ShowPasswordHelp()
+                PasswordTextfields(
+                    newPassword = "",
+                    newConfirmPassword = "",
+                    onNewPasswordChangeAction = {},
+                    onNewPasswordConfirmChangeAction = {},
+                )
+                ConfirmChangesButton(onConfirmChangesAction = {}, enabledStatus = true)
+            }
+        }
     }
 }

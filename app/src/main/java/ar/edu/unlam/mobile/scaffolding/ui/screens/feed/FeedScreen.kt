@@ -33,6 +33,9 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
+private const val MARKED_AS_FAVORITE = "Usuario marcado como favorito"
+private const val REMOVED_FROM_FAVORITE = "Usuario eliminado de favoritos"
+
 @Composable
 fun FeedScreen(
     feedViewModel: FeedViewModel,
@@ -40,6 +43,7 @@ fun FeedScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToReply: (Int) -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
 
@@ -57,7 +61,15 @@ fun FeedScreen(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
             onRetryAction = { feedViewModel.reloadPostList() },
-            onSelectedAsFavoriteAction = { author, avatarUrl -> feedViewModel.markUserAsFavorite(author, avatarUrl) },
+            onSelectedAsFavoriteAction = { author, avatarUrl, isMarkedAsFavorite ->
+                if (isMarkedAsFavorite) {
+                    feedViewModel.unmarkUserFromFavorites(author)
+                    onShowSnackbar(REMOVED_FROM_FAVORITE)
+                } else {
+                    feedViewModel.markUserAsFavorite(author, avatarUrl)
+                    onShowSnackbar(MARKED_AS_FAVORITE)
+                }
+            },
             onReply = { postId -> onNavigateToReply(postId) },
             onLike = { post ->
                 if (post.liked) {
@@ -95,7 +107,7 @@ private fun FeedContent(
     modifier: Modifier,
     uiState: UiState<List<PostUiModel>>,
     onRetryAction: () -> Unit,
-    onSelectedAsFavoriteAction: (String, String) -> Unit,
+    onSelectedAsFavoriteAction: (String, String, Boolean) -> Unit,
     onReply: (Int) -> Unit,
     onLike: (PostResponse) -> Unit,
 ) {
@@ -120,7 +132,13 @@ private fun FeedContent(
                         PostCard(
                             post = apiResponse,
                             isSelectedAsFavorite = markedAsFavoriteValue,
-                            onSelectedAsFavoriteAction = { onSelectedAsFavoriteAction(apiResponse.author, apiResponse.avatarUrl) },
+                            onSelectedAsFavoriteAction = {
+                                onSelectedAsFavoriteAction(
+                                    apiResponse.author,
+                                    apiResponse.avatarUrl,
+                                    markedAsFavoriteValue,
+                                )
+                            },
                             onReply = { onReply(apiResponse.id) },
                             onLike = { onLike(apiResponse) },
                         )
@@ -224,9 +242,9 @@ private fun FeedContentPreview() {
             modifier = Modifier.padding(PADDING_MEDIUM),
             uiState = UiState.Success(samplePosts),
             onRetryAction = {},
-            onSelectedAsFavoriteAction = { _, _ -> },
             onReply = {},
             onLike = {},
+            onSelectedAsFavoriteAction = { _, _, _ -> },
         )
     }
 }

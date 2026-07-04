@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,7 +82,7 @@ fun PostCard(
 
                     IconButton(onClick = onSelectedAsFavoriteAction) {
                         Icon(
-                            imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Outlined.Star,
+                            imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Default.StarBorder,
                             contentDescription = null,
                         )
                     }
@@ -190,7 +190,7 @@ private fun PostCardPreview() {
                     authorId = 7,
                     date = "2026-1-1",
                 ),
-            isSelectedAsFavorite = false,
+            isSelectedAsFavorite = true,
             onSelectedAsFavoriteAction = {},
             onReply = {},
             onLike = {},

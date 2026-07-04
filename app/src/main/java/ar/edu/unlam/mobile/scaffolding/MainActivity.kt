@@ -85,6 +85,13 @@ class MainActivity : ComponentActivity() {
                                         onNavigateToFavorites = {
                                             currentScreen = AppScreen.USERS_MARKED_AS_FAVORITE
                                         },
+                                        onShowSnackbar = { message ->
+                                            launchSnackBarCoroutine(
+                                                snackbarHostState,
+                                                message,
+                                                coroutineScope,
+                                            )
+                                        },
                                     )
                                 }
 
@@ -126,7 +133,9 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 AppScreen.USERS_MARKED_AS_FAVORITE -> {
-                                    FavoriteUserScreen(hiltViewModel())
+                                    FavoriteUserScreen(hiltViewModel()) {
+                                        currentScreen = AppScreen.FEED
+                                    }
                                 }
                             }
                         }

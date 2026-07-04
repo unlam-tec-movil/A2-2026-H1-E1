@@ -41,23 +41,6 @@ class FeedViewModel
             }
         }
 
-        private suspend fun createPostUiModelList(): List<PostUiModel> {
-            val postList = postRepository.getPostList()
-
-            val favoriteUsers = favoriteUserRepository.getAllFavoriteUsers().first()
-
-            val uiPosts: List<PostUiModel> =
-                postList.map { currentPost ->
-                    val isSelectedAsFavorite =
-                        favoriteUsers.any { savedUser ->
-                            savedUser.author == currentPost.author
-                        }
-
-                    PostUiModel(currentPost, isSelectedAsFavorite)
-                }
-            return uiPosts
-        }
-
         fun reloadPostList() {
             loadPosts()
         }
@@ -84,6 +67,50 @@ class FeedViewModel
             }
         }
 
+        fun markUserAsFavorite(
+            author: String,
+            avatarUrl: String,
+        ) {
+            viewModelScope.launch {
+                try {
+                    val user = FavoriteUser(author, avatarUrl)
+
+                    favoriteUserRepository.saveUserAsFavorite(user)
+
+                    updateFavoritePosts(user)
+                } catch (exception: Exception) {
+                    val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
+
+                    setUiAsError(responseMessage)
+                }
+            }
+        }
+
+        fun unmarkUserFromFavorites(author: String) {
+            viewModelScope.launch {
+                favoriteUserRepository.deleteUserFromFavorites(author)
+
+                removeFromFavorites(author)
+            }
+        }
+
+        private suspend fun createPostUiModelList(): List<PostUiModel> {
+            val postList = postRepository.getPostList()
+
+            val favoriteUsers = favoriteUserRepository.getAllFavoriteUsers().first()
+
+            val uiPosts: List<PostUiModel> =
+                postList.map { currentPost ->
+                    val isSelectedAsFavorite =
+                        favoriteUsers.any { savedUser ->
+                            savedUser.author == currentPost.author
+                        }
+
+                    PostUiModel(currentPost, isSelectedAsFavorite)
+                }
+            return uiPosts
+        }
+
         private fun updateFavoritePosts(user: FavoriteUser) {
             val currentUiState = _uiState.value
 
@@ -104,22 +131,23 @@ class FeedViewModel
             }
         }
 
-        fun markUserAsFavorite(
-            author: String,
-            avatarUrl: String,
-        ) {
-            viewModelScope.launch {
-                try {
-                    val user = FavoriteUser(author, avatarUrl)
+        private fun removeFromFavorites(author: String) {
+            val currentUiState = _uiState.value
 
-                    favoriteUserRepository.saveUserAsFavorite(user)
+            if (currentUiState is UiState.Success) {
+                val currentPostResponseList = currentUiState.data
 
-                    updateFavoritePosts(user)
-                } catch (exception: Exception) {
-                    val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
+                val updatedPostList =
+                    currentPostResponseList.map { currentPost ->
 
-                    setUiAsError(responseMessage)
-                }
+                        if (currentPost.apiPostResponse.author == author) {
+                            currentPost.copy(isMarkedAsFavorite = false)
+                        } else {
+                            currentPost
+                        }
+                    }
+
+                setUiAsSuccess(updatedPostList)
             }
         }
     }
