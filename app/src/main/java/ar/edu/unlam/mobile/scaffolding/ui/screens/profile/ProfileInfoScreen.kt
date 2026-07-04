@@ -1,14 +1,15 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.profile
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +34,7 @@ import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.TuiterButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.TuiterOutlinedTextField
+import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
@@ -123,39 +125,41 @@ fun ShowProfileForm(
                 )
             }
 
-            Column(
+            Surface(
                 modifier =
                     Modifier
                         .padding(PADDING_MEDIUM)
-                        .fillMaxSize()
-                        .border(
-                            shape = RoundedCornerShape(PADDING_MEDIUM),
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        ),
+                        .fillMaxSize(),
+                shape = RoundedCornerShape(PADDING_LARGE),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 1.dp,
             ) {
-                UserNameTextfield(
-                    currentName,
-                ) { newUserName -> profileInfoViewModel.onNameChange(newUserName) }
+                Column(
+                    modifier = Modifier.padding(PADDING_MEDIUM).verticalScroll(rememberScrollState()),
+                ) {
+                    UserNameTextfield(
+                        currentName,
+                    ) { newUserName -> profileInfoViewModel.onNameChange(newUserName) }
 
-                EmailTextfield(
-                    currentEmail,
-                ) { newEmail -> profileInfoViewModel.onEmailChange(newEmail) }
+                    EmailTextfield(
+                        currentEmail,
+                    ) { newEmail -> profileInfoViewModel.onEmailChange(newEmail) }
 
-                ShowPasswordHelp()
+                    ShowPasswordHelp()
 
-                PasswordTextfields(
-                    newPassword,
-                    newConfirmPassword,
-                    { newPassword -> profileInfoViewModel.onNewPasswordChange(newPassword) },
-                    { confirmNewPassword ->
-                        profileInfoViewModel.onNewPasswordConfirmChange(
-                            confirmNewPassword,
-                        )
-                    },
-                )
+                    PasswordTextfields(
+                        newPassword,
+                        newConfirmPassword,
+                        { newPassword -> profileInfoViewModel.onNewPasswordChange(newPassword) },
+                        { confirmNewPassword ->
+                            profileInfoViewModel.onNewPasswordConfirmChange(
+                                confirmNewPassword,
+                            )
+                        },
+                    )
 
-                ConfirmChangesButton({ profileInfoViewModel.sendProfileInfoUpdate() }, isSavingStatus)
+                    ConfirmChangesButton({ profileInfoViewModel.sendProfileInfoUpdate() }, isSavingStatus)
+                }
             }
         }
     }
@@ -214,9 +218,15 @@ fun ShowPasswordHelp() {
 @Composable
 fun ShowPasswordRequirementsList() {
     val passwordListItemsMap = generatePasswordListLabelMap()
+    val entries = passwordListItemsMap.entries.toList()
 
-    for (item in passwordListItemsMap) {
-        val textListColor = MaterialTheme.colorScheme.onSurface
+    entries.forEachIndexed { index, item ->
+        val textListColor =
+            if (index == 0) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
         val textListModifier = Modifier.padding(PADDING_MEDIUM)
 
         PasswordHelpText(
