@@ -70,7 +70,8 @@ class MainActivity : ComponentActivity() {
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
                             @Suppress("ktlint:standard:max-line-length")
-                            if (currentScreen == FEED || currentScreen == USERS_MARKED_AS_FAVORITE ||
+                            if (currentScreen == FEED ||
+                                currentScreen == USERS_MARKED_AS_FAVORITE ||
                                 currentScreen == EDIT_PROFILE_INFO
                             ) {
                                 MainBottomBar(currentScreen) { currentScreen = it }
