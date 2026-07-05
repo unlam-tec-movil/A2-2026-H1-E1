@@ -1,8 +1,8 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.post
 
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.Draft
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.Draft
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationRequest
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.DRAFT_SAVED

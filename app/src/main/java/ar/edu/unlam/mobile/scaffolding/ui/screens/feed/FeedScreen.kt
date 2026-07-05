@@ -1,39 +1,40 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
-import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostList
+import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
+import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
+
+private const val MARKED_AS_FAVORITE = "Usuario marcado como favorito"
+private const val REMOVED_FROM_FAVORITE = "Usuario eliminado de favoritos"
 
 @Composable
 fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
-    onNavigateToProfile: () -> Unit,
     onNavigateToReply: (Int) -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
+    onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
 
@@ -43,14 +44,22 @@ fun FeedScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar(onNavigateToProfile, onNavigateToFavorites) },
         floatingActionButton = { HomeFloatingActionButton(onNavigateToCreatePost) },
     ) { paddingValues ->
 
         FeedContent(
             modifier = Modifier.padding(paddingValues),
-            uiState,
-            onRetry = { feedViewModel.reloadPostList() },
+            uiState = uiState,
+            onRetryAction = { feedViewModel.reloadPostList() },
+            onSelectedAsFavoriteAction = { author, avatarUrl, isMarkedAsFavorite ->
+                if (isMarkedAsFavorite) {
+                    feedViewModel.unmarkUserFromFavorites(author)
+                    onShowSnackbar(REMOVED_FROM_FAVORITE)
+                } else {
+                    feedViewModel.markUserAsFavorite(author, avatarUrl)
+                    onShowSnackbar(MARKED_AS_FAVORITE)
+                }
+            },
             onReply = { postId -> onNavigateToReply(postId) },
             onLike = { post ->
                 if (post.liked) {
@@ -59,7 +68,6 @@ fun FeedScreen(
                     feedViewModel.likePost(post.id)
                 }
             },
-            onAddFavorite = { post -> feedViewModel.addFavorite(post.author, post.avatarUrl) },
         )
     }
 }
@@ -75,6 +83,11 @@ private fun TopBar() {
                 color = MaterialTheme.colorScheme.primary,
             )
         },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ),
         modifier = Modifier.padding(PADDING_MEDIUM),
     )
 }
@@ -82,13 +95,16 @@ private fun TopBar() {
 @Composable
 private fun FeedContent(
     modifier: Modifier,
-    uiState: UiState<List<PostResponse>>,
-    onRetry: () -> Unit,
+    uiState: UiState<List<PostUiModel>>,
+    onRetryAction: () -> Unit,
+    onSelectedAsFavoriteAction: (String, String, Boolean) -> Unit,
     onReply: (Int) -> Unit,
     onLike: (PostResponse) -> Unit,
-    onAddFavorite: (PostResponse) -> Unit,
 ) {
-    Box(modifier) {
+    Box(
+        modifier =
+            modifier.background(MaterialTheme.colorScheme.background),
+    ) {
         when (uiState) {
             is UiState.Idle -> {}
 
@@ -97,17 +113,32 @@ private fun FeedContent(
             }
 
             is UiState.Success -> {
-                PostList(
-                    posts = uiState.data,
-                    onReply = onReply,
-                    onLike = onLike,
-                    onAddFavorite = onAddFavorite,
-                )
+                LazyColumn {
+                    items(uiState.data) { post ->
+
+                        val apiResponse = post.apiPostResponse
+                        val markedAsFavoriteValue = post.isMarkedAsFavorite
+
+                        PostCard(
+                            post = apiResponse,
+                            isSelectedAsFavorite = markedAsFavoriteValue,
+                            onSelectedAsFavoriteAction = {
+                                onSelectedAsFavoriteAction(
+                                    apiResponse.author,
+                                    apiResponse.avatarUrl,
+                                    markedAsFavoriteValue,
+                                )
+                            },
+                            onReply = { onReply(apiResponse.id) },
+                            onLike = { onLike(apiResponse) },
+                        )
+                    }
+                }
             }
 
             is UiState.Error -> {
                 ShowErrorMessageOnScreen(
-                    onRetry,
+                    onRetryAction,
                     errorMessage = uiState.error,
                 )
             }
@@ -115,46 +146,51 @@ private fun FeedContent(
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun BottomBar(
-    onNavigateToProfile: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = true,
-            onClick = {},
-            icon = {
-                Icon(Icons.Default.Home, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Inicio") },
+private fun FeedContentPreview() {
+    val samplePosts =
+        listOf(
+            PostUiModel(
+                apiPostResponse =
+                    PostResponse(
+                        id = 1,
+                        author = "Usuario1",
+                        message = "Este es un post de ejemplo para la preview del feed",
+                        likes = 10,
+                        liked = false,
+                        avatarUrl = "",
+                        parentId = 0,
+                        authorId = 1,
+                        date = "2024-01-01",
+                    ),
+                isMarkedAsFavorite = false,
+            ),
+            PostUiModel(
+                apiPostResponse =
+                    PostResponse(
+                        id = 2,
+                        author = "Usuario2",
+                        message = "Otro post interesante en el feed",
+                        likes = 5,
+                        liked = true,
+                        avatarUrl = "",
+                        parentId = 0,
+                        authorId = 2,
+                        date = "2024-01-02",
+                    ),
+                isMarkedAsFavorite = true,
+            ),
         )
 
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToProfile,
-            icon = {
-                Icon(Icons.Default.AccountCircle, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Perfil") },
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToFavorites,
-            icon = {
-                Icon(Icons.Default.Star, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Favoritos") },
+    ScaffoldingV2Theme {
+        FeedContent(
+            modifier = Modifier.padding(PADDING_MEDIUM),
+            uiState = UiState.Success(samplePosts),
+            onRetryAction = {},
+            onReply = {},
+            onLike = {},
+            onSelectedAsFavoriteAction = { _, _, _ -> },
         )
     }
-}
-
-@Composable
-private fun BottomBarTextLabel(textToShow: String) {
-    Text(
-        text = textToShow,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
 }

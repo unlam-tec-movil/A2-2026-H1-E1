@@ -7,5 +7,5 @@ enum class AppScreen {
     CREATE_NEW_POST,
     REPLY_POST,
     EDIT_PROFILE_INFO,
-    FAVORITES,
+    USERS_MARKED_AS_FAVORITE,
 }
