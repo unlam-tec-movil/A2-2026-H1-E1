@@ -5,15 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -40,9 +33,7 @@ private const val REMOVED_FROM_FAVORITE = "Usuario eliminado de favoritos"
 fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
-    onNavigateToProfile: () -> Unit,
     onNavigateToReply: (Int) -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
     onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
@@ -53,7 +44,6 @@ fun FeedScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar(onNavigateToProfile, onNavigateToFavorites) },
         floatingActionButton = { HomeFloatingActionButton(onNavigateToCreatePost) },
     ) { paddingValues ->
 
@@ -154,50 +144,6 @@ private fun FeedContent(
             }
         }
     }
-}
-
-@Composable
-private fun BottomBar(
-    onNavigateToProfile: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = true,
-            onClick = {},
-            icon = {
-                Icon(Icons.Default.Home, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Inicio") },
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToProfile,
-            icon = {
-                Icon(Icons.Default.AccountCircle, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Perfil") },
-        )
-
-        NavigationBarItem(
-            selected = false,
-            onClick = onNavigateToFavorites,
-            icon = {
-                Icon(Icons.Default.Star, contentDescription = null)
-            },
-            label = { BottomBarTextLabel("Favoritos") },
-        )
-    }
-}
-
-@Composable
-private fun BottomBarTextLabel(textToShow: String) {
-    Text(
-        text = textToShow,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)

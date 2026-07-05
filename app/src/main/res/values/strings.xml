@@ -25,4 +25,5 @@
     <string name="at_least_1_digit">• Al menos un número</string>
     <string name="at_least_1_special_character">•Al menos un carácter especial</string>
     <string name="favorite_users_screen_title">Usuarios favoritos</string>
+    <string name="keep_session_credentials">Mantener la sesión iniciada</string>
 </resources>

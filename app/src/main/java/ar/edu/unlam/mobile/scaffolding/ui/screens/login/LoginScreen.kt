@@ -1,14 +1,17 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.login
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -124,17 +127,38 @@ private fun ShowLoginForm(
                 TuiterOutlinedTextField(
                     password,
                     onPasswordChange,
-                    Modifier.fillMaxWidth().padding(top = PADDING_MEDIUM),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = PADDING_MEDIUM),
                     R.string.password_label,
                     PasswordVisualTransformation(),
                     KeyboardOptions(keyboardType = KeyboardType.Password),
                 )
 
+                Row(
+                    modifier = Modifier.padding(top = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Checkbox(
+                        checked = false,
+                        onCheckedChange = null,
+                    )
+                    TuiterTextLabel(
+                        textId = R.string.keep_session_credentials,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    )
+                }
+
                 TuiterButton(
                     R.string.sign_in,
                     onLoginClick,
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    Modifier.fillMaxWidth().padding(top = PADDING_LARGE),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = PADDING_LARGE),
                 )
 
                 TuiterTextLabel(
@@ -161,7 +185,10 @@ private fun ShowErrorScreen(
     onRetry: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.errorContainer),
         contentAlignment = Alignment.Center,
     ) {
         Surface(

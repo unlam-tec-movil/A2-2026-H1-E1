@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -53,6 +54,10 @@ fun ProfileScreen(
 
     BackHandler {
         onNavigateBackAction()
+    }
+
+    LaunchedEffect(true) {
+        profileInfoViewModel.getProfileInfo()
     }
 
     when (val state = uiState) {
@@ -127,7 +132,10 @@ fun ShowProfileForm(
                 tonalElevation = 1.dp,
             ) {
                 Column(
-                    modifier = Modifier.padding(PADDING_MEDIUM).verticalScroll(rememberScrollState()),
+                    modifier =
+                        Modifier
+                            .padding(PADDING_MEDIUM)
+                            .verticalScroll(rememberScrollState()),
                 ) {
                     UserNameTextfield(
                         currentName,
@@ -150,7 +158,10 @@ fun ShowProfileForm(
                         },
                     )
 
-                    ConfirmChangesButton({ profileInfoViewModel.sendProfileInfoUpdate() }, isSavingStatus)
+                    ConfirmChangesButton(
+                        { profileInfoViewModel.sendProfileInfoUpdate() },
+                        isSavingStatus,
+                    )
                 }
             }
         }
