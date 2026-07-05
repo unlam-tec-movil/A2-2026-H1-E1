@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Feed
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity() {
                 selected = currentScreen == USERS_MARKED_AS_FAVORITE,
                 label = { Text(FAVORITES_LABEL) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
-                icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                icon = { Icon(Icons.Default.Star, contentDescription = null) },
             )
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
