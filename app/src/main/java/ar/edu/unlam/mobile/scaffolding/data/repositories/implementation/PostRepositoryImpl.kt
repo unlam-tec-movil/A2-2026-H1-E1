@@ -10,6 +10,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 class PostRepositoryImpl
@@ -19,6 +20,18 @@ class PostRepositoryImpl
         private val tokenManager: TokenManager,
         private val draftDao: DraftDao,
     ) : PostRepository {
+        private val localReplies = ConcurrentHashMap<Int, MutableList<PostResponse>>()
+        private var localIdCounter = -1
+
+        override suspend fun saveLocalReply(
+            parentPostId: Int,
+            reply: PostResponse,
+        ) {
+            localReplies.getOrPut(parentPostId) { mutableListOf() }.add(reply)
+        }
+
+        private fun nextLocalId(): Int = localIdCounter--
+
         override suspend fun createNewPost(
             createPostRequest: PostCreationRequest,
             userToken: String,
@@ -63,17 +76,20 @@ class PostRepositoryImpl
                 )
             }
 
-        override suspend fun getRepliesForPost(postId: Int): List<PostResponse> =
-            try {
-                tuiterApiService
-                    .getPosts(
-                        userToken = tokenManager.tokenFlow.first(),
-                        pageNumber = 1,
-                        onlyParents = false,
-                    ).filter { it.parentId == postId }
-            } catch (_: Exception) {
-                emptyList()
-            }
+        override suspend fun getRepliesForPost(postId: Int): List<PostResponse> {
+            val apiReplies =
+                try {
+                    tuiterApiService
+                        .getPosts(
+                            userToken = tokenManager.tokenFlow.first(),
+                            pageNumber = 1,
+                            onlyParents = false,
+                        ).filter { it.parentId == postId }
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            return apiReplies + (localReplies[postId] ?: emptyList())
+        }
 
         override suspend fun saveDraft(draft: Draft) {
             draftDao.insert(draft)

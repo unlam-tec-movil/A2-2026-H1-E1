@@ -16,6 +16,11 @@ interface PostRepository {
 
     suspend fun getRepliesForPost(postId: Int): List<PostResponse>
 
+    suspend fun saveLocalReply(
+        parentPostId: Int,
+        reply: PostResponse,
+    )
+
     suspend fun saveDraft(draft: Draft)
 
     suspend fun deleteDraft(draftId: Int)

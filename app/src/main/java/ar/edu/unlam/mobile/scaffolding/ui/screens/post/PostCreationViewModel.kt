@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.Draft
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationRequest
+import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.DRAFT_SAVED
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.UNKNOWN_ERROR_MESSAGE
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +48,21 @@ class PostCreationViewModel
                     val token = tokenManager.tokenFlow.first()
                     val request = PostCreationRequest(_message.value, parentId)
                     val response = postRepository.createNewPost(request, token)
+                    if (parentId > 0) {
+                        val localReply =
+                            PostResponse(
+                                id = 0,
+                                message = _message.value,
+                                parentId = parentId,
+                                authorId = 0,
+                                author = "Tú",
+                                avatarUrl = "",
+                                likes = 0,
+                                liked = false,
+                                date = Instant.now().toString(),
+                            )
+                        postRepository.saveLocalReply(parentId, localReply)
+                    }
                     setUiAsSuccess(response.message)
                     checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {
