@@ -34,6 +34,7 @@ fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
     onNavigateToReply: (Int) -> Unit = {},
+    onNavigateToPostDetail: (Int) -> Unit = {},
     onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
@@ -61,6 +62,7 @@ fun FeedScreen(
                 }
             },
             onReply = { postId -> onNavigateToReply(postId) },
+            onPostClick = { postId -> onNavigateToPostDetail(postId) },
             onLike = { post ->
                 if (post.liked) {
                     feedViewModel.unlikePost(post.id)
@@ -99,6 +101,7 @@ private fun FeedContent(
     onRetryAction: () -> Unit,
     onSelectedAsFavoriteAction: (String, String, Boolean) -> Unit,
     onReply: (Int) -> Unit,
+    onPostClick: (Int) -> Unit,
     onLike: (PostResponse) -> Unit,
 ) {
     Box(
@@ -129,6 +132,7 @@ private fun FeedContent(
                                     markedAsFavoriteValue,
                                 )
                             },
+                            onClick = { onPostClick(apiResponse.id) },
                             onReply = { onReply(apiResponse.id) },
                             onLike = { onLike(apiResponse) },
                         )
@@ -189,6 +193,7 @@ private fun FeedContentPreview() {
             uiState = UiState.Success(samplePosts),
             onRetryAction = {},
             onReply = {},
+            onPostClick = {},
             onLike = {},
             onSelectedAsFavoriteAction = { _, _, _ -> },
         )

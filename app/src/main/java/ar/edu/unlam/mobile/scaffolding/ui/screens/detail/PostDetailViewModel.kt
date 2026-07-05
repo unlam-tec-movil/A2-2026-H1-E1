@@ -1,0 +1,41 @@
+package ar.edu.unlam.mobile.scaffolding.ui.screens.detail
+
+import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
+import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
+import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.UNKNOWN_ERROR_MESSAGE
+import ar.edu.unlam.mobile.scaffolding.ui.screens.abstractions.BaseViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+data class PostDetailUiState(
+    val parentPost: PostResponse? = null,
+    val replies: List<PostResponse> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null,
+)
+
+@HiltViewModel
+class PostDetailViewModel
+    @Inject
+    constructor(
+        private val postRepository: PostRepository,
+    ) : BaseViewModel<PostDetailUiState>() {
+        fun loadPostDetail(postId: Int) {
+            viewModelScope.launch {
+                setUiAsLoading()
+
+                try {
+                    val allPosts = postRepository.getRepliesForPost(postId)
+                    val parentPost = allPosts.firstOrNull { it.id == postId }
+                    val replies = allPosts.filter { it.parentId == postId }
+
+                    setUiAsSuccess(PostDetailUiState(parentPost = parentPost, replies = replies))
+                } catch (exception: Exception) {
+                    val responseMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
+                    setUiAsError(responseMessage)
+                }
+            }
+        }
+    }

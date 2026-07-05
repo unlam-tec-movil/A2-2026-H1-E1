@@ -35,6 +35,8 @@ class MockPostRepositoryImpl : PostRepository {
         return postList
     }
 
+    override suspend fun getRepliesForPost(postId: Int): List<PostResponse> = emptyList()
+
     override suspend fun saveDraft(draft: Draft) {
     }
 

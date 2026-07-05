@@ -63,6 +63,18 @@ class PostRepositoryImpl
                 )
             }
 
+        override suspend fun getRepliesForPost(postId: Int): List<PostResponse> =
+            try {
+                tuiterApiService
+                    .getPosts(
+                        userToken = tokenManager.tokenFlow.first(),
+                        pageNumber = 1,
+                        onlyParents = false,
+                    ).filter { it.parentId == postId }
+            } catch (_: Exception) {
+                emptyList()
+            }
+
         override suspend fun saveDraft(draft: Draft) {
             draftDao.insert(draft)
         }

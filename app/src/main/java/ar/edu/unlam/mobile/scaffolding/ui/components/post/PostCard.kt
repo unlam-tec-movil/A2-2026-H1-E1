@@ -44,10 +44,12 @@ fun PostCard(
     post: PostResponse,
     isSelectedAsFavorite: Boolean,
     onSelectedAsFavoriteAction: () -> Unit,
+    onClick: () -> Unit = {},
     onReply: () -> Unit = {},
     onLike: () -> Unit = {},
 ) {
     Surface(
+        onClick = onClick,
         modifier =
             Modifier
                 .padding(PADDING_MEDIUM)
