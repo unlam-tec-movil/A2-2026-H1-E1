@@ -1,13 +1,14 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components.post
 
-
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
+import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 @Composable
@@ -20,11 +21,13 @@ fun PostList(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
+        contentPadding = PaddingValues(PADDING_MEDIUM),
     ) {
         items(
             items = posts,
-            key = { it.id }
+            key = { it.id },
         ) { post ->
             PostCard(
                 post = post,
@@ -37,7 +40,7 @@ fun PostList(
                 },
                 onLike = {
                     onLikeClick(post)
-                }
+                },
             )
         }
     }
@@ -54,7 +57,7 @@ private val previewPosts =
             avatarUrl = "",
             parentId = 0,
             authorId = 1,
-            date = "2026-07-05"
+            date = "2026-07-05",
         ),
         PostResponse(
             id = 2,
@@ -65,7 +68,7 @@ private val previewPosts =
             avatarUrl = "",
             parentId = 0,
             authorId = 2,
-            date = "2026-07-04"
+            date = "2026-07-04",
         ),
         PostResponse(
             id = 3,
@@ -76,7 +79,7 @@ private val previewPosts =
             avatarUrl = "",
             parentId = 0,
             authorId = 3,
-            date = "2026-07-03"
+            date = "2026-07-03",
         ),
         PostResponse(
             id = 4,
@@ -87,8 +90,8 @@ private val previewPosts =
             avatarUrl = "",
             parentId = 0,
             authorId = 4,
-            date = "2026-07-02"
-        )
+            date = "2026-07-02",
+        ),
     )
 
 @Preview(showBackground = true)
@@ -97,7 +100,7 @@ private fun PostListPreview() {
     ScaffoldingV2Theme {
         PostList(
             posts = previewPosts,
-            favoritePosts = setOf(1, 3)
+            favoritePosts = setOf(1, 3),
         )
     }
 }
