@@ -21,26 +21,22 @@ import retrofit2.http.Query
 
 interface TuiterApiService {
     @POST("api/v1/login")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun login(
         @Body request: LoginRequest,
     ): LoginResponse
 
     @POST("api/v1/users")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun register(
         @Body request: RegisterRequest,
     ): RegisterResponse
 
     @POST("api/v1/me/tuits")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun createPost(
         @Body request: PostCreationRequest,
         @Header("Authorization") userToken: String,
     ): PostCreationResponse
 
     @GET("api/v1/me/feed")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun getPosts(
         @Header("Authorization") userToken: String,
         @Query("page") pageNumber: Int,
@@ -48,27 +44,23 @@ interface TuiterApiService {
     ): List<PostResponse>
 
     @GET("api/v1/me/profile")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun getProfileInfo(
         @Header("Authorization") userToken: String,
     ): ProfileInfoResponse
 
     @PUT("api/v1/me/profile")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun updateProfile(
         @Header("Authorization") userToken: String,
         @Body profileUpdateRequest: ProfileInfoUpdateRequest,
     ): ProfileInfoResponse
 
     @POST("api/v1/me/tuits/{tuit_id}/likes")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun likePost(
         @Path("tuit_id") postId: Int,
         @Header("Authorization") userToken: String,
     )
 
     @DELETE("api/v1/me/tuits/{id}/likes")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
     suspend fun unlikePost(
         @Path("id") postId: Int,
         @Header("Authorization") userToken: String,
