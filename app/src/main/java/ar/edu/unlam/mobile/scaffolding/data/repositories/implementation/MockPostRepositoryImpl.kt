@@ -35,6 +35,16 @@ class MockPostRepositoryImpl : PostRepository {
         return postList
     }
 
+    override suspend fun getRepliesForPost(postId: Int): List<PostResponse> = emptyList()
+
+    override suspend fun getRepliesCounts(): Map<Int, Int> = emptyMap()
+
+    override suspend fun saveLocalReply(
+        parentPostId: Int,
+        reply: PostResponse,
+    ) {
+    }
+
     override suspend fun saveDraft(draft: Draft) {
     }
 

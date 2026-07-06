@@ -34,7 +34,7 @@ android {
         buildConfigField(
             "String",
             "APPLICATION_TOKEN",
-            "\"af37d763a6028697bc49799cd93c65a0216062f0a743d86ae6cea2b44f6c6700\"",
+            "\"6283723e611f3023013711a365eb488e21004183286b064753ae90794229a543\"",
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -71,7 +71,6 @@ dependencies {
 
     // Base
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

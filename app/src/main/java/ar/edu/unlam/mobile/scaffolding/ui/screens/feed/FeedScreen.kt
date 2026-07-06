@@ -2,25 +2,32 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
-import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
+import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShimmerFeed
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
@@ -34,6 +41,7 @@ fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
     onNavigateToReply: (Int) -> Unit = {},
+    onNavigateToPostDetail: (Int) -> Unit = {},
     onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
@@ -61,6 +69,7 @@ fun FeedScreen(
                 }
             },
             onReply = { postId -> onNavigateToReply(postId) },
+            onPostClick = { postId -> onNavigateToPostDetail(postId) },
             onLike = { post ->
                 if (post.liked) {
                     feedViewModel.unlikePost(post.id)
@@ -80,7 +89,6 @@ private fun TopBar() {
             Text(
                 text = "Inicio",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
             )
         },
         colors =
@@ -88,7 +96,6 @@ private fun TopBar() {
                 containerColor = MaterialTheme.colorScheme.surface,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
-        modifier = Modifier.padding(PADDING_MEDIUM),
     )
 }
 
@@ -99,8 +106,12 @@ private fun FeedContent(
     onRetryAction: () -> Unit,
     onSelectedAsFavoriteAction: (String, String, Boolean) -> Unit,
     onReply: (Int) -> Unit,
+    onPostClick: (Int) -> Unit,
     onLike: (PostResponse) -> Unit,
 ) {
+    var selectedUser by remember { mutableStateOf<PostResponse?>(null) }
+    var isRefreshing by remember { mutableStateOf(false) }
+
     Box(
         modifier =
             modifier.background(MaterialTheme.colorScheme.background),
@@ -109,29 +120,41 @@ private fun FeedContent(
             is UiState.Idle -> {}
 
             is UiState.Loading -> {
-                ShowLoadingStatusOnScreen()
+                ShimmerFeed()
             }
 
             is UiState.Success -> {
-                LazyColumn {
-                    items(uiState.data) { post ->
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        onRetryAction()
+                        isRefreshing = false
+                    },
+                ) {
+                    LazyColumn {
+                        items(uiState.data) { post ->
 
-                        val apiResponse = post.apiPostResponse
-                        val markedAsFavoriteValue = post.isMarkedAsFavorite
+                            val apiResponse = post.apiPostResponse
+                            val markedAsFavoriteValue = post.isMarkedAsFavorite
 
-                        PostCard(
-                            post = apiResponse,
-                            isSelectedAsFavorite = markedAsFavoriteValue,
-                            onSelectedAsFavoriteAction = {
-                                onSelectedAsFavoriteAction(
-                                    apiResponse.author,
-                                    apiResponse.avatarUrl,
-                                    markedAsFavoriteValue,
-                                )
-                            },
-                            onReply = { onReply(apiResponse.id) },
-                            onLike = { onLike(apiResponse) },
-                        )
+                            PostCard(
+                                post = apiResponse,
+                                isSelectedAsFavorite = markedAsFavoriteValue,
+                                replyCount = post.replyCount,
+                                onSelectedAsFavoriteAction = {
+                                    onSelectedAsFavoriteAction(
+                                        apiResponse.author,
+                                        apiResponse.avatarUrl,
+                                        markedAsFavoriteValue,
+                                    )
+                                },
+                                onClick = { onPostClick(apiResponse.id) },
+                                onUserClick = { selectedUser = apiResponse },
+                                onReply = { onReply(apiResponse.id) },
+                                onLike = { onLike(apiResponse) },
+                            )
+                        }
                     }
                 }
             }
@@ -143,6 +166,27 @@ private fun FeedContent(
                 )
             }
         }
+    }
+
+    if (selectedUser != null) {
+        val user = selectedUser!!
+        AlertDialog(
+            onDismissRequest = { selectedUser = null },
+            title = { Text(user.author) },
+            text = {
+                Column {
+                    Text("ID: ${user.authorId}")
+                    if (user.avatarUrl.isNotEmpty()) {
+                        Text("Avatar: ${user.avatarUrl}")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedUser = null }) {
+                    Text("Cerrar")
+                }
+            },
+        )
     }
 }
 
@@ -189,6 +233,7 @@ private fun FeedContentPreview() {
             uiState = UiState.Success(samplePosts),
             onRetryAction = {},
             onReply = {},
+            onPostClick = {},
             onLike = {},
             onSelectedAsFavoriteAction = { _, _, _ -> },
         )
