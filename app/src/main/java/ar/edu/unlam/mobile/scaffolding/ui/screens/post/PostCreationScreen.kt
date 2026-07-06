@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.post
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -22,12 +22,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.DRAFT_SAVED
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
+import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 private const val DRAFT_BUTTON_TEXT = "Borrador"
 private const val POST_BUTTON_TEXT = "Publicar"
@@ -94,51 +97,53 @@ private fun ShowPostCreationForm(
     onPostAction: () -> Unit,
     onCancelAction: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .padding(PADDING_MEDIUM)
-                .background(MaterialTheme.colorScheme.surface),
+    Surface(
+        modifier = Modifier.padding(PADDING_MEDIUM),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 4.dp,
     ) {
-        Row(
-            modifier = Modifier.padding(PADDING_MEDIUM),
-        ) {
-            IconButton(
-                onClick = onCancelAction,
+        Column {
+            Row(
+                modifier = Modifier.padding(PADDING_MEDIUM),
             ) {
-                Icon(Icons.Default.Cancel, contentDescription = null)
+                IconButton(
+                    onClick = onCancelAction,
+                ) {
+                    Icon(Icons.Default.Cancel, contentDescription = null)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = onDraftAction,
+                    modifier = Modifier.padding(PADDING_SMALL),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                ) {
+                    Text(DRAFT_BUTTON_TEXT)
+                }
+
+                Button(
+                    onClick = onPostAction,
+                    modifier = Modifier.padding(PADDING_SMALL),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ) {
+                    Text(POST_BUTTON_TEXT)
+                }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = onDraftAction,
-                modifier = Modifier.padding(PADDING_SMALL),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            ) {
-                Text(DRAFT_BUTTON_TEXT)
-            }
-
-            Button(
-                onClick = onPostAction,
-                modifier = Modifier.padding(PADDING_SMALL),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            ) {
-                Text(POST_BUTTON_TEXT)
-            }
+            TextField(
+                value = message,
+                placeholder = { Text(TEXTFIELD_PROMPT_TEXT) },
+                onValueChange = { newMessage -> onPostMessageChangeAction(newMessage) },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(PADDING_LARGE),
+                colors = TextFieldDefaults.colors(focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(PADDING_LARGE),
+            )
         }
-
-        TextField(
-            value = message,
-            placeholder = { Text(TEXTFIELD_PROMPT_TEXT) },
-            onValueChange = { newMessage -> onPostMessageChangeAction(newMessage) },
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(PADDING_LARGE),
-            colors = TextFieldDefaults.colors(focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant),
-            shape = RoundedCornerShape(PADDING_LARGE),
-        )
     }
 }
 
@@ -161,6 +166,20 @@ fun ShowErrorMessageOnScreen(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.padding(PADDING_MEDIUM),
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun PostCreationScreenPreview() {
+    ScaffoldingV2Theme {
+        ShowPostCreationForm(
+            message = "",
+            onPostMessageChangeAction = {},
+            onDraftAction = {},
+            onPostAction = {},
+            onCancelAction = {},
         )
     }
 }

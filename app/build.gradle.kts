@@ -92,6 +92,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+    implementation(libs.compose)
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)

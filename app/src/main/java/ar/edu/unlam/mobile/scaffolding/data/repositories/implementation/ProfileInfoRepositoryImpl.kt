@@ -18,5 +18,5 @@ class ProfileInfoRepositoryImpl
         override suspend fun updateProfileInfo(
             token: String,
             profileInfoUpdateRequest: ProfileInfoUpdateRequest,
-        ): ProfileInfoResponse = tuiterApiService.updateProfile(token, profileInfoUpdateRequest)
+        ): ProfileInfoResponse = tuiterApiService.updateProfile("Bearer $token", profileInfoUpdateRequest)
     }
