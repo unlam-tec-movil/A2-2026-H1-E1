@@ -1,5 +1,8 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components.post
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +30,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -59,12 +67,13 @@ fun PostCard(
     Surface(
         modifier =
             Modifier
-                .padding(PADDING_MEDIUM)
+                .padding(horizontal = PADDING_LARGE, vertical = PADDING_SMALL)
                 .fillMaxWidth(),
-        shape = RoundedCornerShape(PADDING_LARGE),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
         Column(modifier = Modifier.padding(PADDING_MEDIUM)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -170,6 +179,11 @@ private fun PostActions(
     onReply: () -> Unit,
     onLike: () -> Unit,
 ) {
+    var likedState by remember { mutableStateOf(liked) }
+    val scale by animateFloatAsState(
+        targetValue = if (likedState) 1.15f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = 600f),
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -178,11 +192,17 @@ private fun PostActions(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onLike) {
+            IconButton(
+                onClick = {
+                    likedState = !likedState
+                    onLike()
+                },
+            ) {
                 Icon(
-                    if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    modifier = Modifier.scale(scale),
+                    imageVector = if (likedState) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Me gusta",
-                    tint = if (liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (likedState) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 

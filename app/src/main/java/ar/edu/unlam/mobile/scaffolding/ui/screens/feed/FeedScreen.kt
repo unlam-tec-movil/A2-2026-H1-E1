@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
-import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
+import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShimmerFeed
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
@@ -89,7 +89,6 @@ private fun TopBar() {
             Text(
                 text = "Inicio",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
             )
         },
         colors =
@@ -97,7 +96,6 @@ private fun TopBar() {
                 containerColor = MaterialTheme.colorScheme.surface,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
-        modifier = Modifier.padding(PADDING_MEDIUM),
     )
 }
 
@@ -122,7 +120,7 @@ private fun FeedContent(
             is UiState.Idle -> {}
 
             is UiState.Loading -> {
-                ShowLoadingStatusOnScreen()
+                ShimmerFeed()
             }
 
             is UiState.Success -> {

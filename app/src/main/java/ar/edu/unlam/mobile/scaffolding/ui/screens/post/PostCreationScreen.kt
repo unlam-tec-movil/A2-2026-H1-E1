@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.post
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -97,10 +98,15 @@ private fun ShowPostCreationForm(
     onCancelAction: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier.padding(PADDING_MEDIUM),
+        modifier =
+            Modifier
+                .padding(PADDING_MEDIUM)
+                .fillMaxSize(),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
         Column {
             Row(
@@ -140,7 +146,7 @@ private fun ShowPostCreationForm(
                         .fillMaxSize()
                         .padding(PADDING_LARGE),
                 colors = TextFieldDefaults.colors(focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(PADDING_LARGE),
+                shape = RoundedCornerShape(12.dp),
             )
         }
     }

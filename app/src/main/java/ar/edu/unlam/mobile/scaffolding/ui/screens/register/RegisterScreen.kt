@@ -1,10 +1,13 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.register
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -88,33 +92,43 @@ fun ShowRegisterForm(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer,
+                            ),
+                    ),
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(PADDING_LARGE)
+                    .padding(horizontal = 32.dp)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PADDING_LARGE),
+                shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 2.dp,
-                shadowElevation = 4.dp,
+                shadowElevation = 8.dp,
             ) {
                 Column(
                     modifier = Modifier.padding(PADDING_LARGE),
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
                 ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
                         text = "Crear Cuenta",
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.displayLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     )
 
@@ -122,8 +136,10 @@ fun ShowRegisterForm(
                         R.string.register_title_label,
                         MaterialTheme.typography.titleMedium,
                         MaterialTheme.colorScheme.onSurfaceVariant,
-                        Modifier.padding(bottom = PADDING_LARGE),
+                        Modifier.padding(top = 4.dp),
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     TuiterOutlinedTextField(
                         name,
@@ -135,31 +151,33 @@ fun ShowRegisterForm(
                     TuiterOutlinedTextField(
                         email,
                         onEmailChange,
-                        Modifier.fillMaxWidth().padding(top = PADDING_MEDIUM),
+                        Modifier.fillMaxWidth(),
                         R.string.email_label,
                     )
 
                     TuiterOutlinedTextField(
                         password,
                         onPasswordChange,
-                        Modifier.fillMaxWidth().padding(top = PADDING_MEDIUM),
+                        Modifier.fillMaxWidth(),
                         R.string.password_label,
                         PasswordVisualTransformation(),
                         KeyboardOptions(keyboardType = KeyboardType.Password),
                     )
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     TuiterButton(
                         R.string.confirm,
                         onRegisterClick,
                         ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        Modifier.fillMaxWidth().padding(top = PADDING_LARGE),
+                        Modifier.fillMaxWidth(),
                     )
 
                     TuiterButton(
                         R.string.reset_form,
                         onResetClick,
                         ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                        Modifier.fillMaxWidth().padding(top = PADDING_MEDIUM),
+                        Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -181,10 +199,10 @@ private fun ShowRegisterErrorScreen(
                 Modifier
                     .fillMaxWidth()
                     .padding(PADDING_LARGE),
-            shape = RoundedCornerShape(PADDING_LARGE),
+            shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp,
-            shadowElevation = 4.dp,
+            tonalElevation = 1.dp,
+            shadowElevation = 2.dp,
         ) {
             Column(
                 modifier = Modifier.padding(PADDING_LARGE),

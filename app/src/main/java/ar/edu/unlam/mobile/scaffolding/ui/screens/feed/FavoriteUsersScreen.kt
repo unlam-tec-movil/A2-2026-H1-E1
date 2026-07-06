@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardDefaults.cardElevation
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,20 +31,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
-import ar.edu.unlam.mobile.scaffolding.ui.components.shared.TuiterTextLabel
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.AVATAR_SIZE
-import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
+import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil.compose.AsyncImage
 
 @Composable
 fun FavoriteUserScreen(
@@ -97,85 +97,91 @@ fun ShowFavoriteUsersScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(PADDING_MEDIUM),
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PADDING_MEDIUM),
-        ) {
-            TuiterTextLabel(
-                R.string.favorite_users_screen_title,
-                textStyle = MaterialTheme.typography.titleLarge,
-                textColor = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(PADDING_MEDIUM),
-            )
-        }
+        Text(
+            text = stringResource(R.string.favorite_users_screen_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(PADDING_MEDIUM),
+        )
 
-        Column {
-            Card(
-                modifier = Modifier.padding(PADDING_MEDIUM),
-                shape = RoundedCornerShape(PADDING_LARGE),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation =
-                    cardElevation(
-                        defaultElevation = 2.dp,
-                    ),
-            ) {
-                LazyColumn {
-                    items(favoriteUsers) { user ->
-                        val author = user.author
-                        FavoriteUserCard(user) { onRemoveFromFavoritesAction(author) }
-                    }
-                }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PADDING_SMALL),
+            modifier = Modifier.padding(top = PADDING_SMALL),
+        ) {
+            items(favoriteUsers) { user ->
+                val author = user.author
+                FavoriteUserCard(user) { onRemoveFromFavoritesAction(author) }
             }
         }
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun FavoriteUserCard(
     user: FavoriteUser,
     onRemoveFromFavoritesAction: (String) -> Unit,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(PADDING_MEDIUM),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
-        Box(
+        Row(
             modifier =
                 Modifier
-                    .size(AVATAR_SIZE)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
+                    .fillMaxWidth()
+                    .padding(PADDING_MEDIUM),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            GlideImage(
-                model = user.avatarUrl,
-                contentDescription = null,
+            Box(
                 modifier =
                     Modifier
                         .size(AVATAR_SIZE)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (user.avatarUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = user.avatarUrl,
+                        contentDescription = null,
+                        modifier =
+                            Modifier
+                                .size(AVATAR_SIZE)
+                                .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = user.author,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
             )
-        }
 
-        Text(
-            text = user.author,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+            Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        IconButton(
-            onClick = { onRemoveFromFavoritesAction(user.author) },
-        ) {
-            Icon(Icons.Default.DeleteOutline, contentDescription = null)
+            IconButton(
+                onClick = { onRemoveFromFavoritesAction(user.author) },
+            ) {
+                Icon(
+                    Icons.Default.DeleteOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }
