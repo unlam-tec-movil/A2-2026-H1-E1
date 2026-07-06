@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.Instant
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,7 +61,7 @@ class PostCreationViewModel
                                 avatarUrl = "",
                                 likes = 0,
                                 liked = false,
-                                date = Instant.now().toString(),
+                                date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(Date()),
                             )
                         postRepository.saveLocalReply(parentId, localReply)
                     }
