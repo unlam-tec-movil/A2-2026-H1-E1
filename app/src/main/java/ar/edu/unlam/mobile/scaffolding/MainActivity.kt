@@ -3,145 +3,256 @@ package ar.edu.unlam.mobile.scaffolding
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.automirrored.filled.Feed
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
-import ar.edu.unlam.mobile.scaffolding.ui.components.SnackbarVisualsWithError
-import ar.edu.unlam.mobile.scaffolding.ui.screens.FormScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.HOME_SCREEN_ROUTE
-import ar.edu.unlam.mobile.scaffolding.ui.screens.HomeScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.UserScreen
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.CREATE_NEW_POST
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.EDIT_PROFILE_INFO
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.FEED
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.LOGIN
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REGISTER
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REPLY_POST
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.USERS_MARKED_AS_FAVORITE
+import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+private const val HOME_LABEL = "Inicio"
+private const val FAVORITES_LABEL = "Favoritos"
+private const val PROFILE_LABEL = "Perfil"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            var currentScreen by remember { mutableStateOf(LOGIN) }
+            var replyPostId by remember { mutableIntStateOf(0) }
+            val snackbarHostState = remember { SnackbarHostState() }
+            val coroutineScope = rememberCoroutineScope()
+
             ScaffoldingV2Theme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    MainScreen()
+                    Scaffold(
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
+                        bottomBar = {
+                            @Suppress("ktlint:standard:max-line-length")
+                            if (currentScreen == FEED || currentScreen == USERS_MARKED_AS_FAVORITE ||
+                                currentScreen == EDIT_PROFILE_INFO
+                            ) {
+                                MainBottomBar(currentScreen) { currentScreen = it }
+                            }
+                        },
+                    ) { paddingValues ->
+
+                        Surface(modifier = Modifier.padding(paddingValues)) {
+                            when (currentScreen) {
+                                LOGIN -> {
+                                    GoToLoginScreen(onNavigate = { currentScreen = it })
+                                }
+
+                                REGISTER -> {
+                                    GoToRegisterScreen { currentScreen = it }
+                                }
+
+                                FEED -> {
+                                    GoToFeedScreen(
+                                        { currentScreen = it },
+                                        { replyPostId = it },
+                                        {
+                                            launchSnackBarCoroutine(
+                                                snackbarHostState = snackbarHostState,
+                                                snackBarMessage = it,
+                                                coroutineScope = coroutineScope,
+                                            )
+                                        },
+                                    )
+                                }
+
+                                CREATE_NEW_POST -> {
+                                    GoToPostCreationScreen(
+                                        { currentScreen = it },
+                                        {
+                                            launchSnackBarCoroutine(
+                                                snackbarHostState = snackbarHostState,
+                                                snackBarMessage = it,
+                                                coroutineScope = coroutineScope,
+                                            )
+                                        },
+                                    )
+                                }
+
+                                REPLY_POST -> {
+                                    GoToReplyScreen(
+                                        { currentScreen = it },
+                                        {
+                                            launchSnackBarCoroutine(
+                                                snackbarHostState = snackbarHostState,
+                                                snackBarMessage = it,
+                                                coroutineScope = coroutineScope,
+                                            )
+                                        },
+                                        replyPostId,
+                                    )
+                                }
+
+                                EDIT_PROFILE_INFO -> {
+                                    GoToProfileScreen { currentScreen = it }
+                                }
+
+                                USERS_MARKED_AS_FAVORITE -> {
+                                    GoToFavoritesScreen { currentScreen = it }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-}
 
-@Composable
-fun MainScreen() {
-    // Controller es el elemento que nos permite navegar entre pantallas. Tiene las acciones
-    // para navegar como naviegate y también la información de en dónde se "encuentra" el usuario
-    // a través del back stack
-    val controller = rememberNavController()
-    val snackBarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    Scaffold(
-        bottomBar = { BottomBar(controller = controller) },
-        floatingActionButton = {
-            IconButton(onClick = { controller.navigate("home") }) {
-                Icon(Icons.Filled.Home, contentDescription = "Home")
-            }
-        },
-        snackbarHost = {
-            SnackbarHost(snackBarHostState) { data ->
-                // custom snackbar with the custom action button color and border
-                val isError = (data.visuals as? SnackbarVisualsWithError)?.isError ?: false
-                val buttonColor =
-                    if (isError) {
-                        ButtonDefaults.textButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.error,
-                        )
-                    } else {
-                        ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.inversePrimary,
-                        )
-                    }
-
-                Snackbar(
-                    modifier =
-                        Modifier
-                            .border(2.dp, MaterialTheme.colorScheme.secondary)
-                            .padding(12.dp),
-                    action = {
-                        TextButton(
-                            onClick = { if (isError) data.dismiss() else data.performAction() },
-                            colors = buttonColor,
-                        ) {
-                            Text(data.visuals.actionLabel ?: "")
-                        }
-                    },
-                ) {
-                    Text(data.visuals.message)
-                }
-            }
-        },
-    ) { paddingValue ->
-        // NavHost es el componente que funciona como contenedor de los otros componentes que
-        // podrán ser destinos de navegación.
-        NavHost(navController = controller, startDestination = HOME_SCREEN_ROUTE) {
-            // composable es el componente que se usa para definir un destino de navegación.
-            // Por parámetro recibe la ruta que se utilizará para navegar a dicho destino.
-            composable("home") {
-                // Home es el componente en sí que es el destino de navegación.
-                HomeScreen(modifier = Modifier.padding(paddingValue))
-            }
-            composable("form") {
-                FormScreen(
-                    modifier = Modifier.padding(paddingValue),
-                    snackbarHostState = snackBarHostState,
-                )
-            }
-            composable(
-                route = "user/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType }),
-            ) { navBackStackEntry ->
-                val id = navBackStackEntry.arguments?.getString("id") ?: "1"
-                UserScreen(
-                    userId = id,
-                    onError = {
-                        coroutineScope.launch {
-                            snackBarHostState.showSnackbar(
-                                SnackbarVisualsWithError(
-                                    it.message ?: "Error desconocido",
-                                    true,
-                                ),
-                            )
-                        }
-                    },
-                    modifier = Modifier.padding(paddingValue),
-                )
-            }
+    @Composable
+    private fun MainBottomBar(
+        currentScreen: AppScreen,
+        onNavigate: (AppScreen) -> Unit,
+    ) {
+        NavigationBar {
+            NavigationBarItem(
+                selected = currentScreen == FEED,
+                label = { Text(HOME_LABEL) },
+                onClick = { onNavigate(FEED) },
+                icon = { Icon(Icons.AutoMirrored.Filled.Feed, contentDescription = null) },
+            )
+            NavigationBarItem(
+                selected = currentScreen == USERS_MARKED_AS_FAVORITE,
+                label = { Text(FAVORITES_LABEL) },
+                onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
+                icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+            )
+            NavigationBarItem(
+                selected = currentScreen == EDIT_PROFILE_INFO,
+                label = { Text(PROFILE_LABEL) },
+                onClick = { onNavigate(EDIT_PROFILE_INFO) },
+                icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+            )
         }
+    }
+
+    @Composable
+    private fun GoToLoginScreen(onNavigate: (AppScreen) -> Unit) {
+        LoginScreen(
+            hiltViewModel(),
+            onLoginSuccess = { onNavigate(FEED) },
+            onNavigateToRegister = { onNavigate(REGISTER) },
+        )
+    }
+
+    @Composable
+    private fun GoToRegisterScreen(onNavigate: (AppScreen) -> Unit) {
+        RegisterScreen(
+            registerViewModel = hiltViewModel(),
+        ) { onNavigate(FEED) }
+    }
+
+    @Composable
+    private fun GoToFeedScreen(
+        onNavigate: (AppScreen) -> Unit,
+        onReplyAction: (Int) -> Unit,
+        onShowSnackBar: (String) -> Unit,
+    ) {
+        FeedScreen(
+            feedViewModel = hiltViewModel(),
+            onNavigateToCreatePost = {
+                onNavigate(CREATE_NEW_POST)
+            },
+            onNavigateToReply = { postId ->
+                onReplyAction(postId)
+                onNavigate(REPLY_POST)
+            },
+            onShowSnackbar = onShowSnackBar,
+        )
+    }
+
+    @Composable
+    private fun GoToPostCreationScreen(
+        onNavigate: (AppScreen) -> Unit,
+        onShowSnackBar: (String) -> Unit,
+    ) {
+        PostCreationScreen(
+            postCreationViewModel = hiltViewModel(),
+            onPostAction = { onNavigate(FEED) },
+            onCancelAction = { onNavigate(FEED) },
+            onShowSnackbar = onShowSnackBar,
+        )
+    }
+
+    @Composable
+    private fun GoToReplyScreen(
+        onNavigate: (AppScreen) -> Unit,
+        onShowSnackBar: (String) -> Unit,
+        replyPostId: Int,
+    ) {
+        ReplyScreen(
+            parentPostId = replyPostId,
+            postCreationViewModel = hiltViewModel(),
+            onPostAction = { onNavigate(FEED) },
+            onCancelAction = { onNavigate(FEED) },
+            onShowSnackbar = onShowSnackBar,
+        )
+    }
+
+    @Composable
+    private fun GoToProfileScreen(onNavigate: (AppScreen) -> Unit) {
+        ProfileScreen(hiltViewModel()) {
+            onNavigate(FEED)
+        }
+    }
+
+    @Composable
+    private fun GoToFavoritesScreen(onNavigate: (AppScreen) -> Unit) {
+        FavoriteUserScreen(hiltViewModel()) {
+            onNavigate(FEED)
+        }
+    }
+
+    private fun launchSnackBarCoroutine(
+        snackbarHostState: SnackbarHostState,
+        snackBarMessage: String,
+        coroutineScope: CoroutineScope,
+    ) {
+        coroutineScope.launch { snackbarHostState.showSnackbar(snackBarMessage) }
     }
 }

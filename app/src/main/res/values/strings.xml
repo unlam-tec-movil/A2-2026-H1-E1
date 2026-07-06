@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">ScaffoldingV2</string>
+    <string name="login_title_label">Bienvenido a Tuiter UNLaM</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="login_loading_indicator_label">Cargando…</string>
+    <string name="retry_label">Reintentar</string>
+    <string name="sign_in">Iniciar sesión</string>
+    <string name="not_user_yet">¿No tienes cuenta aún?</string>
+    <string name="sign_up">Registrarse</string>
+    <string name="register_title_label">Crear Usuario</string>
+    <string name="register_name_label">Nombre</string>
+    <string name="confirm">Confirmar datos</string>
+    <string name="reset_form">Limpiar campos</string>
+    <string name="user_creation_error_label">Ocurrió un error al crear el usuario</string>
+    <string name="user_profile_title_label">Perfil de usuario</string>
+    <string name="edit_user_name_prompt_text">Nuevo nombre de usuario</string>
+    <string name="edit_user_email_prompt_text">Nuevo email</string>
+    <string name="edit_user_password_prompt_text">Ingresar nueva contraseña</string>
+    <string name="edit_user_password_confirm_prompt_text">Confirmar nueva contraseña</string>
+    <string name="password_update_help_title">Consejos para actualizar tu contraseña</string>
+    <string name="at_least_8_characters">• Mínimo 8 caracteres de longitud</string>
+    <string name="at_least_1_uppercase">• Al menos una letra mayúscula</string>
+    <string name="at_least_1_lowercase">• Al menos una letra minúscula</string>
+    <string name="at_least_1_digit">• Al menos un número</string>
+    <string name="at_least_1_special_character">•Al menos un carácter especial</string>
+    <string name="favorite_users_screen_title">Usuarios favoritos</string>
+    <string name="keep_session_credentials">Mantener la sesión iniciada</string>
 </resources>
