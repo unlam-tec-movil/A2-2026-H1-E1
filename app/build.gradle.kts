@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.compose)
+    implementation(libs.coil.compose)
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)

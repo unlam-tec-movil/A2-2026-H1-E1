@@ -25,4 +25,10 @@ class TokenManager
                 preferences[TOKEN_KEY] = token
             }
         }
+
+        suspend fun clearToken() {
+            dataStore.edit { preferences ->
+                preferences.remove(TOKEN_KEY)
+            }
+        }
     }

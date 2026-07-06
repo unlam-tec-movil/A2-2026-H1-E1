@@ -164,7 +164,13 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 EDIT_PROFILE_INFO -> {
-                                    GoToProfileScreen { currentScreen = it }
+                                    GoToProfileScreen(
+                                        onNavigate = { currentScreen = it },
+                                        onLogout = {
+                                            tokenManager.clearToken()
+                                            currentScreen = LOGIN
+                                        },
+                                    )
                                 }
 
                                 USERS_MARKED_AS_FAVORITE -> {
@@ -293,10 +299,20 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun GoToProfileScreen(onNavigate: (AppScreen) -> Unit) {
-        ProfileScreen(hiltViewModel()) {
-            onNavigate(FEED)
-        }
+    private fun GoToProfileScreen(
+        onNavigate: (AppScreen) -> Unit,
+        onLogout: suspend () -> Unit,
+    ) {
+        val scope = rememberCoroutineScope()
+        ProfileScreen(
+            profileInfoViewModel = hiltViewModel(),
+            onNavigateBackAction = { onNavigate(FEED) },
+            onLogout = {
+                scope.launch {
+                    onLogout()
+                }
+            },
+        )
     }
 
     @Composable

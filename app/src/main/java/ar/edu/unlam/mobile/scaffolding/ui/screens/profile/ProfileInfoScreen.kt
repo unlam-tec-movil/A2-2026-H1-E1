@@ -43,6 +43,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 fun ProfileScreen(
     profileInfoViewModel: ProfileInfoViewModel,
     onNavigateBackAction: () -> Unit,
+    onLogout: () -> Unit = {},
 ) {
     val uiState by profileInfoViewModel.uiState.collectAsState()
     val currentName by profileInfoViewModel.name.collectAsState()
@@ -80,6 +81,7 @@ fun ProfileScreen(
                 newConfirmPassword,
                 profileInfoViewModel,
                 isSavingStatus,
+                onLogout,
             )
         }
 
@@ -95,6 +97,7 @@ fun ShowProfileForm(
     newConfirmPassword: String,
     profileInfoViewModel: ProfileInfoViewModel,
     isSavingStatus: Boolean,
+    onLogout: () -> Unit = {},
 ) {
     Surface(
         modifier =
@@ -161,6 +164,16 @@ fun ShowProfileForm(
                     ConfirmChangesButton(
                         { profileInfoViewModel.sendProfileInfoUpdate() },
                         isSavingStatus,
+                    )
+
+                    TuiterButton(
+                        textId = R.string.logout,
+                        onClickAction = onLogout,
+                        buttonColor =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                            ),
+                        modifier = Modifier.padding(PADDING_SMALL),
                     )
                 }
             }
