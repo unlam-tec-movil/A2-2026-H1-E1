@@ -25,7 +25,11 @@ fun PostList(
             items = posts,
             key = { it.id },
         ) { post ->
-            PostCard(post = post)
+            PostCard(
+                post = post,
+                isSelectedAsFavorite = false,
+                onSelectedAsFavoriteAction = {},
+            )
         }
     }
 }
@@ -47,9 +51,13 @@ val mockPost =
 
 @Preview(showBackground = true)
 @Composable
-fun PostCardPreview() {
+fun PostListPostCardPreview() {
     MaterialTheme {
-        PostCard(post = mockPost)
+        PostCard(
+            post = mockPost,
+            isSelectedAsFavorite = false,
+            onSelectedAsFavoriteAction = {},
+        )
     }
 }
 
