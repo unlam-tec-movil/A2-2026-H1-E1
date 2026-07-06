@@ -18,6 +18,7 @@ retrofit = "2.11.0"
 datastorePreferences = "1.2.1"
 datastoreCore = "1.2.1"
 roomVersion = "2.8.4"
+compose = "1.0.0-beta09"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
