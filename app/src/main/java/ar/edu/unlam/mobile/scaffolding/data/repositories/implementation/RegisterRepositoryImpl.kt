@@ -11,6 +11,5 @@ class RegisterRepositoryImpl
     constructor(
         private val tuiterApiService: TuiterApiService,
     ) : RegisterRepository {
-        override suspend fun register(registerRequest: RegisterRequest): RegisterResponse =
-            tuiterApiService.register(registerRequest)
+        override suspend fun register(registerRequest: RegisterRequest): RegisterResponse = tuiterApiService.register(registerRequest)
     }
