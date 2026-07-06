@@ -1,6 +1,9 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.detail
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -31,12 +37,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShowLoadingStatusOnScreen
-import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
@@ -49,6 +55,8 @@ fun PostDetailScreen(
     onBack: () -> Unit,
     onReply: (Int) -> Unit,
     onShowSnackbar: (String) -> Unit,
+    onLike: (PostResponse) -> Unit = {},
+    onUnlike: (PostResponse) -> Unit = {},
 ) {
     val uiState by postDetailViewModel.uiState.collectAsState()
 
@@ -91,7 +99,18 @@ fun PostDetailScreen(
                 ) {
                     if (parentPost != null) {
                         item {
-                            ParentPostCard(parentPost)
+                            ParentPostCard(
+                                post = parentPost,
+                                onLike = {
+                                    if (parentPost.liked) {
+                                        postDetailViewModel.unlikePost(parentPost.id)
+                                        onUnlike(parentPost)
+                                    } else {
+                                        postDetailViewModel.likePost(parentPost.id)
+                                        onLike(parentPost)
+                                    }
+                                },
+                            )
                         }
                     }
 
@@ -120,7 +139,15 @@ fun PostDetailScreen(
                                 isSelectedAsFavorite = false,
                                 onSelectedAsFavoriteAction = {},
                                 onReply = { onReply(reply.id) },
-                                onLike = {},
+                                onLike = {
+                                    if (reply.liked) {
+                                        postDetailViewModel.unlikePost(reply.id)
+                                        onUnlike(reply)
+                                    } else {
+                                        postDetailViewModel.likePost(reply.id)
+                                        onLike(reply)
+                                    }
+                                },
                             )
                         }
                     }
@@ -138,26 +165,40 @@ fun PostDetailScreen(
 }
 
 @Composable
-private fun ParentPostCard(post: PostResponse) {
+private fun ParentPostCard(
+    post: PostResponse,
+    onLike: () -> Unit = {},
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(PADDING_LARGE),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
         Column(
             modifier = Modifier.padding(PADDING_MEDIUM),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
             ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+                Box(
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(PADDING_MEDIUM))
 
                 Text(
                     text = post.author,
@@ -178,14 +219,16 @@ private fun ParentPostCard(post: PostResponse) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    tint = if (post.liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                IconButton(onClick = onLike) {
+                    Icon(
+                        imageVector = if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Me gusta",
+                        tint = if (post.liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
                 Text(
-                    text = " ${post.likes}",
+                    text = "${post.likes}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
