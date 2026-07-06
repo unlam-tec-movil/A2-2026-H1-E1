@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,7 +43,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMAL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
-import coil.compose.AsyncImage
 
 @Composable
 fun FavoriteUserScreen(
@@ -144,23 +142,11 @@ private fun FavoriteUserCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center,
             ) {
-                if (user.avatarUrl.isNotEmpty()) {
-                    AsyncImage(
-                        model = user.avatarUrl,
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .size(AVATAR_SIZE)
-                                .clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))

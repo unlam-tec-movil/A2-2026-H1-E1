@@ -64,7 +64,6 @@ dependencies {
 
     // Base
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -93,7 +92,6 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.compose)
-    implementation(libs.coil.compose)
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)

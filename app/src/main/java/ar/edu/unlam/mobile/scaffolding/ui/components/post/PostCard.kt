@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,7 +47,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARG
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
-import coil.compose.AsyncImage
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -77,7 +74,7 @@ fun PostCard(
     ) {
         Column(modifier = Modifier.padding(PADDING_MEDIUM)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                PostAvatar(avatarUrl = post.avatarUrl, onClick = onUserClick)
+                PostAvatar(onClick = onUserClick)
 
                 Spacer(modifier = Modifier.width(PADDING_SMALL))
 
@@ -122,10 +119,7 @@ fun PostCard(
 }
 
 @Composable
-private fun PostAvatar(
-    avatarUrl: String = "",
-    onClick: () -> Unit = {},
-) {
+private fun PostAvatar(onClick: () -> Unit = {}) {
     Box(
         modifier =
             Modifier
@@ -135,20 +129,11 @@ private fun PostAvatar(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center,
     ) {
-        if (avatarUrl.isNotEmpty()) {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        } else {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Icon(
+            Icons.Default.Person,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

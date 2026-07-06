@@ -1,11 +1,11 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.detail
 
 import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
 import ar.edu.unlam.mobile.scaffolding.ui.constant.text.TextConstant.UNKNOWN_ERROR_MESSAGE
 import ar.edu.unlam.mobile.scaffolding.ui.screens.abstractions.BaseViewModel
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
