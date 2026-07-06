@@ -43,6 +43,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
@@ -256,8 +257,12 @@ class MainActivity : ComponentActivity() {
         onNavigate: (AppScreen) -> Unit,
         onShowSnackBar: (String) -> Unit,
     ) {
+        val postCreationViewModel = hiltViewModel<PostCreationViewModel>()
+        LaunchedEffect(Unit) {
+            postCreationViewModel.setParentId(0)
+        }
         PostCreationScreen(
-            postCreationViewModel = hiltViewModel(),
+            postCreationViewModel = postCreationViewModel,
             onPostAction = { onNavigate(FEED) },
             onCancelAction = { onNavigate(FEED) },
             onShowSnackbar = onShowSnackBar,

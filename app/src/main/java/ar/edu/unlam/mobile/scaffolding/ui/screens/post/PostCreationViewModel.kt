@@ -47,7 +47,7 @@ class PostCreationViewModel
                 try {
                     val token = tokenManager.tokenFlow.first()
                     val request = PostCreationRequest(_message.value, parentId)
-                    val response = postRepository.createNewPost(request, token)
+                    postRepository.createNewPost(request, token)
                     if (parentId > 0) {
                         val localReply =
                             PostResponse(

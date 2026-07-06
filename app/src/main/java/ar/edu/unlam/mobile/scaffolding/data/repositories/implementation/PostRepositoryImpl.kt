@@ -21,7 +21,6 @@ class PostRepositoryImpl
         private val draftDao: DraftDao,
     ) : PostRepository {
         private val localReplies = ConcurrentHashMap<Int, MutableList<PostResponse>>()
-        private var localIdCounter = -1
 
         override suspend fun saveLocalReply(
             parentPostId: Int,
@@ -29,8 +28,6 @@ class PostRepositoryImpl
         ) {
             localReplies.getOrPut(parentPostId) { mutableListOf() }.add(reply)
         }
-
-        private fun nextLocalId(): Int = localIdCounter--
 
         override suspend fun createNewPost(
             createPostRequest: PostCreationRequest,

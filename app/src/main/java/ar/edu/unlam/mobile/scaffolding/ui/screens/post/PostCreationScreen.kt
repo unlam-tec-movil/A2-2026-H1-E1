@@ -36,7 +36,6 @@ private const val DRAFT_BUTTON_TEXT = "Borrador"
 private const val POST_BUTTON_TEXT = "Publicar"
 private const val TEXTFIELD_PROMPT_TEXT = "¿Qué estás pensando?..."
 private const val DRAFT_CREATED_SNACKBAR_TEXT = "¡Tu borrador ha sido creado!"
-private const val POST_SNACKBAR_TEXT = "¡Tu post ha sido publicado!"
 
 @Composable
 fun PostCreationScreen(
