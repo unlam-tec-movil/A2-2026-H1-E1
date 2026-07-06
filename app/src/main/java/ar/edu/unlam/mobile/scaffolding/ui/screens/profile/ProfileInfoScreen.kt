@@ -355,7 +355,7 @@ private fun ProfileScreenPreview() {
                         text = "Perfil",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 8.dp),
+                        modifier = Modifier.padding(start = PADDING_MEDIUM),
                     )
                 }
 

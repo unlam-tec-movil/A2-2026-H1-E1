@@ -41,7 +41,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.PostReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -70,7 +70,8 @@ class MainActivity : ComponentActivity() {
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
                             @Suppress("ktlint:standard:max-line-length")
-                            if (currentScreen == FEED || currentScreen == USERS_MARKED_AS_FAVORITE ||
+                            if (currentScreen == FEED ||
+                                currentScreen == USERS_MARKED_AS_FAVORITE ||
                                 currentScreen == EDIT_PROFILE_INFO
                             ) {
                                 MainBottomBar(currentScreen) { currentScreen = it }
@@ -116,17 +117,7 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 REPLY_POST -> {
-                                    GoToReplyScreen(
-                                        { currentScreen = it },
-                                        {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
-                                        replyPostId,
-                                    )
+                                    GoToReplyScreen(replyPostId) { currentScreen = it }
                                 }
 
                                 EDIT_PROFILE_INFO -> {
@@ -221,17 +212,10 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun GoToReplyScreen(
-        onNavigate: (AppScreen) -> Unit,
-        onShowSnackBar: (String) -> Unit,
         replyPostId: Int,
+        onNavigate: (AppScreen) -> Unit,
     ) {
-        ReplyScreen(
-            parentPostId = replyPostId,
-            postCreationViewModel = hiltViewModel(),
-            onPostAction = { onNavigate(FEED) },
-            onCancelAction = { onNavigate(FEED) },
-            onShowSnackbar = onShowSnackBar,
-        )
+        PostReplyScreen(hiltViewModel(), { onNavigate(FEED) }, replyPostId)
     }
 
     @Composable

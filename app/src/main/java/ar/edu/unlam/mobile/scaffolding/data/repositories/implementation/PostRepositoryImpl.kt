@@ -54,4 +54,14 @@ class PostRepositoryImpl
         ) {
             tuiterApiService.unlikePost(postId, userToken)
         }
+
+        override suspend fun getPostReplies(
+            postId: Int,
+            userToken: String,
+        ): List<PostResponse> = tuiterApiService.getRepliesList(userToken, postId).body() ?: emptyList()
+
+        override suspend fun getPostById(
+            postId: Int,
+            userToken: String,
+        ): PostResponse = tuiterApiService.getPostById(postId, userToken)
     }

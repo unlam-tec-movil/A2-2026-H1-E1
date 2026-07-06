@@ -136,7 +136,7 @@ private fun ShowLoginForm(
                 )
 
                 Row(
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = PADDING_LARGE),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -148,7 +148,7 @@ private fun ShowLoginForm(
                         textId = R.string.keep_session_credentials,
                         textStyle = MaterialTheme.typography.bodyMedium,
                         textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
                     )
                 }
 

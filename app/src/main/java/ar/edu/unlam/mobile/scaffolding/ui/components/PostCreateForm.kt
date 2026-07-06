@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 
 @Composable
 fun PostCreateForm(
@@ -26,7 +27,7 @@ fun PostCreateForm(
     onPublishClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier.padding(PADDING_LARGE),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -37,7 +38,7 @@ fun PostCreateForm(
                 modifier = Modifier.size(72.dp),
             )
             Spacer(
-                modifier = Modifier.width(16.dp),
+                modifier = Modifier.width(PADDING_LARGE),
             )
             OutlinedTextField(
                 value = postText,
