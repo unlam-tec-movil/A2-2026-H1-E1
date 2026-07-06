@@ -63,7 +63,9 @@ class PostCreationViewModel
                             )
                         postRepository.saveLocalReply(parentId, localReply)
                     }
-                    setUiAsSuccess(response.message)
+                    val successMessage =
+                        if (parentId > 0) RESPONSE_PUBLISHED else POST_CREATED
+                    setUiAsSuccess(successMessage)
                     checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {
                     val responseErrorMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
@@ -99,5 +101,10 @@ class PostCreationViewModel
 
         fun restoreStatus() {
             setUiAsIdle()
+        }
+
+        private companion object {
+            const val POST_CREATED = "Post creado exitosamente"
+            const val RESPONSE_PUBLISHED = "Tu respuesta ha sido publicada"
         }
     }

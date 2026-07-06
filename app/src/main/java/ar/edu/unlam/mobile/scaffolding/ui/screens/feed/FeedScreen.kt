@@ -143,6 +143,7 @@ private fun FeedContent(
                             PostCard(
                                 post = apiResponse,
                                 isSelectedAsFavorite = markedAsFavoriteValue,
+                                replyCount = post.replyCount,
                                 onSelectedAsFavoriteAction = {
                                     onSelectedAsFavoriteAction(
                                         apiResponse.author,

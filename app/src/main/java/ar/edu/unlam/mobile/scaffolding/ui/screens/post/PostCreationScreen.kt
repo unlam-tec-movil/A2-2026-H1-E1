@@ -74,7 +74,7 @@ fun PostCreationScreen(
                 restoreState()
                 onCancelAction()
             } else {
-                onShowSnackbar(POST_SNACKBAR_TEXT)
+                onShowSnackbar(state.data)
                 restoreState()
                 onPostAction()
             }

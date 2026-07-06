@@ -27,6 +27,8 @@ interface PostRepository {
 
     fun getAllDrafts(): Flow<List<Draft>>
 
+    suspend fun getRepliesCounts(): Map<Int, Int>
+
     suspend fun likePost(
         postId: Int,
         userToken: String,

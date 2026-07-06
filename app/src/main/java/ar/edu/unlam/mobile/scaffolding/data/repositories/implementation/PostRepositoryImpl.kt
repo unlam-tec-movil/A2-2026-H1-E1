@@ -91,6 +91,27 @@ class PostRepositoryImpl
             return apiReplies + (localReplies[postId] ?: emptyList())
         }
 
+        override suspend fun getRepliesCounts(): Map<Int, Int> {
+            val apiCounts =
+                try {
+                    tuiterApiService
+                        .getPosts(
+                            userToken = tokenManager.tokenFlow.first(),
+                            pageNumber = 1,
+                            onlyParents = false,
+                        ).filter { it.parentId > 0 }
+                        .groupBy { it.parentId }
+                        .mapValues { it.value.size }
+                } catch (_: Exception) {
+                    emptyMap<Int, Int>()
+                }
+            val localCounts =
+                localReplies.mapValues { it.value.size }
+            return (apiCounts.keys + localCounts.keys).associateWith {
+                (apiCounts[it] ?: 0) + (localCounts[it] ?: 0)
+            }
+        }
+
         override suspend fun saveDraft(draft: Draft) {
             draftDao.insert(draft)
         }

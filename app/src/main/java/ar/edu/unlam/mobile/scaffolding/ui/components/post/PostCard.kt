@@ -49,6 +49,7 @@ import java.util.Locale
 fun PostCard(
     post: PostResponse,
     isSelectedAsFavorite: Boolean,
+    replyCount: Int = 0,
     onSelectedAsFavoriteAction: () -> Unit,
     onClick: () -> Unit = {},
     onUserClick: () -> Unit = {},
@@ -103,6 +104,7 @@ fun PostCard(
             PostActions(
                 likes = post.likes,
                 liked = post.liked,
+                replyCount = replyCount,
                 onReply = onReply,
                 onLike = onLike,
             )
@@ -164,6 +166,7 @@ private fun PostText(
 private fun PostActions(
     likes: Int,
     liked: Boolean,
+    replyCount: Int = 0,
     onReply: () -> Unit,
     onLike: () -> Unit,
 ) {
@@ -190,8 +193,20 @@ private fun PostActions(
             )
         }
 
-        IconButton(onClick = onReply) {
-            Icon(Icons.Default.Replay, contentDescription = "Responder")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onReply) {
+                Icon(Icons.Default.Replay, contentDescription = "Responder")
+            }
+
+            if (replyCount > 0) {
+                Text(
+                    text = "$replyCount",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

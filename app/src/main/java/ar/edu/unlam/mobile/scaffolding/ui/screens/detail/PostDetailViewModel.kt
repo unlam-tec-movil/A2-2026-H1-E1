@@ -27,9 +27,9 @@ class PostDetailViewModel
                 setUiAsLoading()
 
                 try {
-                    val allPosts = postRepository.getRepliesForPost(postId)
-                    val parentPost = allPosts.firstOrNull { it.id == postId }
-                    val replies = allPosts.filter { it.parentId == postId }
+                    val allFeedPosts = postRepository.getPostList()
+                    val parentPost = allFeedPosts.firstOrNull { it.id == postId }
+                    val replies = postRepository.getRepliesForPost(postId)
 
                     setUiAsSuccess(PostDetailUiState(parentPost = parentPost, replies = replies))
                 } catch (exception: Exception) {
