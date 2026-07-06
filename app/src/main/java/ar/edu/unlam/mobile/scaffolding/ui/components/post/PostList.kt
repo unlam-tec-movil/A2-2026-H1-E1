@@ -23,23 +23,19 @@ fun PostList(
     ) {
         items(
             items = posts,
-            key = { it.id }
+            key = { it.id },
         ) { post ->
             PostCard(post = post)
         }
     }
 }
 
-
-
-
-
-//Mock
+// Mock
 
 val mockPost =
     PostResponse(
         id = 1,
-        message = "¡Hola a todos! Este es un post de prueba para verificar cómo se renderiza la tarjeta en Jetpack Compose. ",
+        message = "¡Hola a todos! Este es un post de prueba para verificar cómo se renderiza la tarjeta en Jetpack Compose.",
         parentId = 0,
         authorId = 101,
         author = "Juan Pérez",
@@ -49,7 +45,6 @@ val mockPost =
         date = "2026-06-30T19:30:00Z",
     )
 
-
 @Preview(showBackground = true)
 @Composable
 fun PostCardPreview() {
@@ -58,42 +53,42 @@ fun PostCardPreview() {
     }
 }
 
-private val mockPosts = listOf(
-    PostResponse(
-        id = 1,
-        message = "¡Hola! Este es el primer post de prueba.",
-        parentId = 0,
-        authorId = 101,
-        author = "Juan Pérez",
-        avatarUrl = "",
-        likes = 42,
-        liked = true,
-        date = "2026-06-30",
-    ),
-    PostResponse(
-        id = 2,
-        message = "Jetpack Compose hace muy sencillo crear interfaces modernas.",
-        parentId = 0,
-        authorId = 102,
-        author = "María Gómez",
-        avatarUrl = "",
-        likes = 18,
-        liked = false,
-        date = "2026-06-30",
-    ),
-    PostResponse(
-        id = 3,
-        message = "Este es un tercer post para comprobar el comportamiento del LazyColumn.",
-        parentId = 0,
-        authorId = 103,
-        author = "Carlos López",
-        avatarUrl = "",
-        likes = 7,
-        liked = false,
-        date = "2026-06-30",
-    ),
-)
-
+private val mockPosts =
+    listOf(
+        PostResponse(
+            id = 1,
+            message = "¡Hola! Este es el primer post de prueba.",
+            parentId = 0,
+            authorId = 101,
+            author = "Juan Pérez",
+            avatarUrl = "",
+            likes = 42,
+            liked = true,
+            date = "2026-06-30",
+        ),
+        PostResponse(
+            id = 2,
+            message = "Jetpack Compose hace muy sencillo crear interfaces modernas.",
+            parentId = 0,
+            authorId = 102,
+            author = "María Gómez",
+            avatarUrl = "",
+            likes = 18,
+            liked = false,
+            date = "2026-06-30",
+        ),
+        PostResponse(
+            id = 3,
+            message = "Este es un tercer post para comprobar el comportamiento del LazyColumn.",
+            parentId = 0,
+            authorId = 103,
+            author = "Carlos López",
+            avatarUrl = "",
+            likes = 7,
+            liked = false,
+            date = "2026-06-30",
+        ),
+    )
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
