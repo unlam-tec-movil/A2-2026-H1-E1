@@ -17,7 +17,6 @@ class FavoriteUsersScreenViewModel
         private val favoriteUserRepository: FavoriteUserRepository,
     ) : BaseViewModel<List<FavoriteUser>>() {
         init {
-
             loadFavoritesUsers()
         }
 
@@ -27,27 +26,23 @@ class FavoriteUsersScreenViewModel
 
                 try {
                     val favoritesUsers = getFirstItemOnFavoritesUsersFlow()
-
                     setUiAsSuccess(favoritesUsers)
                 } catch (exception: Exception) {
-                    val responseError = exception.message ?: UNKNOWN_ERROR_MESSAGE
-
-                    setUiAsError(responseError)
+                    setUiAsError(exception.message ?: UNKNOWN_ERROR_MESSAGE)
                 }
             }
         }
 
-        fun deleteFromFavoritesByAuthor(author: String) {
+        fun deleteFromFavoritesByAuthorId(authorId: Int) {
             viewModelScope.launch {
                 setUiAsLoading()
 
                 try {
-                    favoriteUserRepository.deleteUserFromFavorites(author)
+                    favoriteUserRepository.deleteUserFromFavorites(authorId)
                     val favoritesUsers = getFirstItemOnFavoritesUsersFlow()
                     setUiAsSuccess(favoritesUsers)
                 } catch (exception: Exception) {
-                    val responseError = exception.message ?: UNKNOWN_ERROR_MESSAGE
-                    setUiAsError(responseError)
+                    setUiAsError(exception.message ?: UNKNOWN_ERROR_MESSAGE)
                 }
             }
         }

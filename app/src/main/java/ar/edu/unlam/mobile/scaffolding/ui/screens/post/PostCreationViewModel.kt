@@ -49,7 +49,18 @@ class PostCreationViewModel
                 try {
                     val token = tokenManager.tokenFlow.first()
                     val request = PostCreationRequest(_message.value, parentId)
-                    postRepository.createNewPost(request, token)
+
+                    val response =
+                        if (parentId != 0) {
+                            postRepository.createReply(
+                                parentPostId = parentId,
+                                createPostRequest = request,
+                                userToken = token,
+                            )
+                        } else {
+                            postRepository.createNewPost(request, token)
+                        }
+
                     if (parentId > 0) {
                         val localReply =
                             PostResponse(
@@ -61,17 +72,20 @@ class PostCreationViewModel
                                 avatarUrl = "",
                                 likes = 0,
                                 liked = false,
-                                date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(Date()),
+                                date =
+                                    SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                                        Locale.getDefault(),
+                                    ).format(Date()),
                             )
+
                         postRepository.saveLocalReply(parentId, localReply)
                     }
-                    val successMessage =
-                        if (parentId > 0) RESPONSE_PUBLISHED else POST_CREATED
-                    setUiAsSuccess(successMessage)
+
+                    setUiAsSuccess(response.message)
                     checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {
-                    val responseErrorMessage = exception.message ?: UNKNOWN_ERROR_MESSAGE
-                    setUiAsError(responseErrorMessage)
+                    setUiAsError(exception.message ?: UNKNOWN_ERROR_MESSAGE)
                 }
             }
         }
@@ -103,10 +117,5 @@ class PostCreationViewModel
 
         fun restoreStatus() {
             setUiAsIdle()
-        }
-
-        private companion object {
-            const val POST_CREATED = "Post creado exitosamente"
-            const val RESPONSE_PUBLISHED = "Tu respuesta ha sido publicada"
         }
     }

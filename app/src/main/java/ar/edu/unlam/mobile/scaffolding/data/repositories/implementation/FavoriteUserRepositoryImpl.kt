@@ -15,8 +15,8 @@ class FavoriteUserRepositoryImpl
             favoriteUserDao.insertFavoriteUser(favoriteUser)
         }
 
-        override suspend fun deleteUserFromFavorites(favoriteUserName: String) {
-            favoriteUserDao.deleteFavoriteUser(favoriteUserName)
+        override suspend fun deleteUserFromFavorites(authorId: Int) {
+            favoriteUserDao.deleteFavoriteUser(authorId)
         }
 
         override fun getAllFavoriteUsers(): Flow<List<FavoriteUser>> = favoriteUserDao.getUsersMarkedAsFavorite()
