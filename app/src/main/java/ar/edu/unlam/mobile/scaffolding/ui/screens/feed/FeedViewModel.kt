@@ -21,10 +21,6 @@ class FeedViewModel
         private val favoriteUserRepository: FavoriteUserRepository,
         private val tokenManager: TokenManager,
     ) : BaseViewModel<List<PostUiModel>>() {
-        init {
-            loadPosts()
-        }
-
         fun loadPosts() {
             viewModelScope.launch {
                 setUiAsLoading()
@@ -44,7 +40,7 @@ class FeedViewModel
         fun likePost(postId: Int) {
             viewModelScope.launch {
                 try {
-                    val token = tokenManager.tokenFlow.first()
+                    val token = getToken()
                     postRepository.likePost(postId, token)
                     loadPosts()
                 } catch (_: Exception) {
@@ -55,7 +51,7 @@ class FeedViewModel
         fun unlikePost(postId: Int) {
             viewModelScope.launch {
                 try {
-                    val token = tokenManager.tokenFlow.first()
+                    val token = getToken()
                     postRepository.unlikePost(postId, token)
                     loadPosts()
                 } catch (_: Exception) {
@@ -89,6 +85,30 @@ class FeedViewModel
             viewModelScope.launch {
                 favoriteUserRepository.deleteUserFromFavorites(authorId)
                 removeFromFavorites(authorId)
+            }
+        }
+
+        fun togglePostLike(
+            id: Int,
+            liked: Boolean,
+        ) {
+            if (liked) {
+                unlikePost(id)
+            } else {
+                likePost(id)
+            }
+        }
+
+        fun toggleUserFavorite(
+            authorId: Int,
+            author: String,
+            avatarUrl: String,
+            markedAsFavorite: Boolean,
+        ) {
+            if (markedAsFavorite) {
+                unmarkUserFromFavorites(authorId)
+            } else {
+                markUserAsFavorite(authorId, author, avatarUrl)
             }
         }
 
@@ -148,4 +168,6 @@ class FeedViewModel
                 setUiAsSuccess(updatedPostList)
             }
         }
+
+        private suspend fun getToken(): String = tokenManager.tokenFlow.first()
     }
