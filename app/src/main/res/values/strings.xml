@@ -30,4 +30,6 @@
     <string name="nav_bar_home_button">Inicio</string>
     <string name="nav_bar_favorites_button">Favoritos</string>
     <string name="nav_bar_profile_button">Perfil</string>
+    <string name="marked_as_favorite_snackbar">"Usuario marcado como favorito"</string>
+    <string name="unmarked_from_favorite_snackbar">"Usuario eliminado de favoritos"</string>
 </resources>
