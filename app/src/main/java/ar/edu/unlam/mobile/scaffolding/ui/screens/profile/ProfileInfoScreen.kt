@@ -48,7 +48,6 @@ fun ProfileScreen(
     val uiState by profileInfoViewModel.uiState.collectAsState()
     val currentName by profileInfoViewModel.name.collectAsState()
     val currentEmail by profileInfoViewModel.email.collectAsState()
-    val currentAvatarURL by profileInfoViewModel.avatarUrl.collectAsState()
     val newPassword by profileInfoViewModel.newPassword.collectAsState()
     val newConfirmPassword by profileInfoViewModel.newPasswordConfirm.collectAsState()
     val isSavingStatus by profileInfoViewModel.isSaving.collectAsState()
@@ -115,7 +114,10 @@ fun ShowProfileForm(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(PADDING_LARGE),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(PADDING_LARGE),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -220,7 +222,10 @@ fun EmailTextfield(
 @Composable
 fun ShowPasswordHelp() {
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(PADDING_MEDIUM),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 1.dp,
@@ -344,7 +349,10 @@ fun ConfirmChangesButton(
         textId = R.string.confirm,
         onClickAction = onConfirmChangesAction,
         buttonColor = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(PADDING_MEDIUM),
         isEnabled = !enabledStatus,
     )
 }
@@ -354,14 +362,20 @@ fun ConfirmChangesButton(
 private fun ProfileScreenPreview() {
     ScaffoldingV2Theme {
         Surface(
-            modifier = Modifier.fillMaxSize().padding(PADDING_MEDIUM),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(PADDING_MEDIUM),
             shape = RoundedCornerShape(PADDING_MEDIUM),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp,
             shadowElevation = 4.dp,
         ) {
             Column(
-                modifier = Modifier.padding(PADDING_MEDIUM).fillMaxSize(),
+                modifier =
+                    Modifier
+                        .padding(PADDING_MEDIUM)
+                        .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -373,7 +387,7 @@ private fun ProfileScreenPreview() {
                         text = "Perfil",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 8.dp),
+                        modifier = Modifier.padding(start = PADDING_MEDIUM),
                     )
                 }
 

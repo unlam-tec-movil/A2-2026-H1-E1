@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -155,6 +157,22 @@ private fun ShowLoginForm(
                     KeyboardOptions(keyboardType = KeyboardType.Password),
                 )
 
+                Row(
+                    modifier = Modifier.padding(top = PADDING_LARGE),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Checkbox(
+                        checked = false,
+                        onCheckedChange = null,
+                    )
+                    TuiterTextLabel(
+                        textId = R.string.keep_session_credentials,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TuiterButton(

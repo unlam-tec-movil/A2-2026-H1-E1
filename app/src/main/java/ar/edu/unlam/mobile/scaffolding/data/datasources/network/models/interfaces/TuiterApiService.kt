@@ -9,6 +9,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.P
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoUpdateRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.register.RegisterRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.register.RegisterResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -75,7 +76,7 @@ interface TuiterApiService {
     suspend fun getRepliesByPostId(
         @Path("tuit_id") postId: Int,
         @Header("Authorization") userToken: String,
-    ): retrofit2.Response<List<PostResponse>>
+    ): Response<List<PostResponse>>
 
     @POST("api/v1/me/tuits/{tuit_id}/replies")
     suspend fun createReply(

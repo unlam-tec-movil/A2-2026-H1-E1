@@ -27,4 +27,7 @@
     <string name="favorite_users_screen_title">Usuarios favoritos</string>
     <string name="keep_session_credentials">Mantener la sesión iniciada</string>
     <string name="logout">Cerrar sesión</string>
+    <string name="nav_bar_home_button">Inicio</string>
+    <string name="nav_bar_favorites_button">Favoritos</string>
+    <string name="nav_bar_profile_button">Perfil</string>
 </resources>

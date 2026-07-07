@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
@@ -38,7 +39,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.FEED
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.LOGIN
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.POST_DETAIL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REGISTER
-import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REPLY_POST
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.USERS_MARKED_AS_FAVORITE
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserPostsScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
@@ -49,17 +49,11 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.postdetail.PostDetailScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val HOME_LABEL = "Inicio"
-private const val FAVORITES_LABEL = "Favoritos"
-private const val PROFILE_LABEL = "Perfil"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -71,12 +65,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var currentScreen by remember { mutableStateOf(LOGIN) }
-            var replyParentPost by remember { mutableStateOf<PostResponse?>(null) }
             var selectedPost by remember { mutableStateOf<PostResponse?>(null) }
             var selectedFavoriteUser by remember { mutableStateOf<FavoriteUser?>(null) }
 
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
+
+            val snackBarAction: (String) -> Unit = { message ->
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
+            }
 
             LaunchedEffect(Unit) {
                 val savedToken = tokenManager.tokenFlow.first()
@@ -93,7 +92,6 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
-                            @Suppress("ktlint:standard:max-line-length")
                             if (currentScreen == FEED ||
                                 currentScreen == USERS_MARKED_AS_FAVORITE ||
                                 currentScreen == EDIT_PROFILE_INFO
@@ -116,47 +114,21 @@ class MainActivity : ComponentActivity() {
                                     GoToFeedScreen(
                                         onNavigate = { currentScreen = it },
                                         onReplyAction = { post ->
-                                            replyParentPost = post
-                                            currentScreen = REPLY_POST
+                                            selectedPost = post
+                                            currentScreen = POST_DETAIL
                                         },
                                         onPostClick = { post ->
                                             selectedPost = post
                                             currentScreen = POST_DETAIL
                                         },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                     )
                                 }
 
                                 CREATE_NEW_POST -> {
                                     GoToPostCreationScreen(
                                         onNavigate = { currentScreen = it },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
-                                    )
-                                }
-
-                                REPLY_POST -> {
-                                    GoToReplyScreen(
-                                        onNavigate = { currentScreen = it },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
-                                        replyParentPost = replyParentPost,
+                                        onShowSnackBar = snackBarAction,
                                     )
                                 }
 
@@ -165,8 +137,8 @@ class MainActivity : ComponentActivity() {
                                         selectedPost = selectedPost,
                                         onNavigate = { currentScreen = it },
                                         onReplyAction = { post ->
-                                            replyParentPost = post
-                                            currentScreen = REPLY_POST
+                                            selectedPost = post
+                                            currentScreen = POST_DETAIL
                                         },
                                         onPostClick = { post ->
                                             selectedPost = post
@@ -200,8 +172,8 @@ class MainActivity : ComponentActivity() {
                                         favoriteUser = selectedFavoriteUser,
                                         onNavigate = { currentScreen = it },
                                         onReplyAction = { post ->
-                                            replyParentPost = post
-                                            currentScreen = REPLY_POST
+                                            selectedPost = post
+                                            currentScreen = POST_DETAIL
                                         },
                                     )
                                 }
@@ -221,21 +193,21 @@ class MainActivity : ComponentActivity() {
         NavigationBar {
             NavigationBarItem(
                 selected = currentScreen == FEED,
-                label = { Text(HOME_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_home_button)) },
                 onClick = { onNavigate(FEED) },
                 icon = { Icon(Icons.AutoMirrored.Filled.Feed, contentDescription = null) },
             )
 
             NavigationBarItem(
                 selected = currentScreen == USERS_MARKED_AS_FAVORITE,
-                label = { Text(FAVORITES_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_favorites_button)) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
                 icon = { Icon(Icons.Default.Star, contentDescription = null) },
             )
 
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
-                label = { Text(PROFILE_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_profile_button)) },
                 onClick = { onNavigate(EDIT_PROFILE_INFO) },
                 icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
             )
@@ -291,23 +263,6 @@ class MainActivity : ComponentActivity() {
             onCancelAction = { onNavigate(FEED) },
             onShowSnackbar = onShowSnackBar,
         )
-    }
-
-    @Composable
-    private fun GoToReplyScreen(
-        onNavigate: (AppScreen) -> Unit,
-        onShowSnackBar: (String) -> Unit,
-        replyParentPost: PostResponse?,
-    ) {
-        replyParentPost?.let { parentPost ->
-            ReplyScreen(
-                parentPost = parentPost,
-                postCreationViewModel = hiltViewModel(),
-                onPostAction = { onNavigate(FEED) },
-                onCancelAction = { onNavigate(FEED) },
-                onShowSnackbar = onShowSnackBar,
-            )
-        }
     }
 
     @Composable
@@ -373,13 +328,5 @@ class MainActivity : ComponentActivity() {
             onBackAction = { onNavigate(FEED) },
             onFavoriteUserClick = onFavoriteUserClick,
         )
-    }
-
-    private fun launchSnackBarCoroutine(
-        snackbarHostState: SnackbarHostState,
-        snackBarMessage: String,
-        coroutineScope: CoroutineScope,
-    ) {
-        coroutineScope.launch { snackbarHostState.showSnackbar(snackBarMessage) }
     }
 }

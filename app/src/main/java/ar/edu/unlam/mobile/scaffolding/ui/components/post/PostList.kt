@@ -13,12 +13,12 @@ import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 
 @Composable
 fun PostList(
+    modifier: Modifier = Modifier,
     posts: List<PostResponse>,
     favoritePosts: Set<Int> = emptySet(),
     onFavoriteClick: (PostResponse) -> Unit = {},
     onReplyClick: (PostResponse) -> Unit = {},
     onLikeClick: (PostResponse) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier,
