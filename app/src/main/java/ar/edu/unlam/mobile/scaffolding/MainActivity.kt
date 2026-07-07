@@ -1,14 +1,17 @@
 package ar.edu.unlam.mobile.scaffolding
 
 import android.os.Bundle
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Star
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Feed
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -19,7 +22,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,9 +55,11 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.compose.material.icons.outlined.AccountCircle as AccountCircleOutlined
+import androidx.compose.material.icons.outlined.Home as HomeOutlined
+import androidx.compose.material.icons.outlined.Star as StarOutlined
 
 private const val HOME_LABEL = "Inicio"
 private const val FAVORITES_LABEL = "Favoritos"
@@ -78,13 +82,6 @@ class MainActivity : ComponentActivity() {
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
-            LaunchedEffect(Unit) {
-                val savedToken = tokenManager.tokenFlow.first()
-                if (savedToken.isNotEmpty()) {
-                    currentScreen = FEED
-                }
-            }
-
             ScaffoldingV2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -93,9 +90,10 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
-                            @Suppress("ktlint:standard:max-line-length")
-                            if (currentScreen == FEED ||
+                            if (
+                                currentScreen == FEED ||
                                 currentScreen == USERS_MARKED_AS_FAVORITE ||
+                                currentScreen == FAVORITE_USER_POSTS ||
                                 currentScreen == EDIT_PROFILE_INFO
                             ) {
                                 MainBottomBar(currentScreen) { currentScreen = it }
@@ -129,6 +127,15 @@ class MainActivity : ComponentActivity() {
                                                 snackBarMessage = it,
                                                 coroutineScope = coroutineScope,
                                             )
+                                        },
+                                        onUnauthorized = {
+                                            coroutineScope.launch {
+                                                tokenManager.clearToken()
+                                                replyParentPost = null
+                                                selectedPost = null
+                                                selectedFavoriteUser = null
+                                                currentScreen = LOGIN
+                                            }
                                         },
                                     )
                                 }
@@ -180,6 +187,9 @@ class MainActivity : ComponentActivity() {
                                         onNavigate = { currentScreen = it },
                                         onLogout = {
                                             tokenManager.clearToken()
+                                            replyParentPost = null
+                                            selectedPost = null
+                                            selectedFavoriteUser = null
                                             currentScreen = LOGIN
                                         },
                                     )
@@ -223,25 +233,41 @@ class MainActivity : ComponentActivity() {
                 selected = currentScreen == FEED,
                 label = { Text(HOME_LABEL) },
                 onClick = { onNavigate(FEED) },
-                icon = { Icon(Icons.AutoMirrored.Filled.Feed, contentDescription = null) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = HOME_LABEL,
+                    )
+                },
             )
 
             NavigationBarItem(
-                selected = currentScreen == USERS_MARKED_AS_FAVORITE,
+                selected =
+                    currentScreen == USERS_MARKED_AS_FAVORITE ||
+                            currentScreen == FAVORITE_USER_POSTS,
                 label = { Text(FAVORITES_LABEL) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
-                icon = { Icon(Icons.Default.Star, contentDescription = null) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = FAVORITES_LABEL,
+                    )
+                },
             )
 
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
                 label = { Text(PROFILE_LABEL) },
                 onClick = { onNavigate(EDIT_PROFILE_INFO) },
-                icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = PROFILE_LABEL,
+                    )
+                },
             )
         }
     }
-
     @Composable
     private fun GoToLoginScreen(onNavigate: (AppScreen) -> Unit) {
         LoginScreen(
@@ -264,6 +290,7 @@ class MainActivity : ComponentActivity() {
         onReplyAction: (PostResponse) -> Unit,
         onPostClick: (PostResponse) -> Unit,
         onShowSnackBar: (String) -> Unit,
+        onUnauthorized: () -> Unit,
     ) {
         FeedScreen(
             feedViewModel = hiltViewModel(),
@@ -271,6 +298,7 @@ class MainActivity : ComponentActivity() {
             onNavigateToReply = { post -> onReplyAction(post) },
             onNavigateToPostDetail = { post -> onPostClick(post) },
             onShowSnackbar = onShowSnackBar,
+            onUnauthorized = onUnauthorized,
         )
     }
 
@@ -280,10 +308,6 @@ class MainActivity : ComponentActivity() {
         onShowSnackBar: (String) -> Unit,
     ) {
         val postCreationViewModel = hiltViewModel<PostCreationViewModel>()
-
-        LaunchedEffect(Unit) {
-            postCreationViewModel.setParentId(0)
-        }
 
         PostCreationScreen(
             postCreationViewModel = postCreationViewModel,

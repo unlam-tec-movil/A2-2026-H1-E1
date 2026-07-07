@@ -45,13 +45,13 @@ class PostRepositoryImpl
                             pageNumber = page,
                             onlyParents = true,
                         )
-                    } catch (_: Exception) {
+                    } catch (exception: retrofit2.HttpException) {
+                        throw exception
+                    } catch (_: java.io.IOException) {
                         return getOfflinePosts()
                     }
 
-                if (posts.isEmpty()) {
-                    break
-                }
+                if (posts.isEmpty()) break
 
                 allPosts.addAll(posts)
                 page++

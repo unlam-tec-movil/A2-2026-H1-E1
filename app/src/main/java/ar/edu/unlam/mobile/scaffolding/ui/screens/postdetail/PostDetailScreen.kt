@@ -123,6 +123,7 @@ private fun PostDetailContent(
                 post = data.selectedPost,
                 isSelectedAsFavorite = false,
                 onSelectedAsFavoriteAction = {},
+                repliesCount = data.replies.size,
                 onReply = { onReplyAction(data.selectedPost) },
                 onLike = {},
                 onPostClick = {},

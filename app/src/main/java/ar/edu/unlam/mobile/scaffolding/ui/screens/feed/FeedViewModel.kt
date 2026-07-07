@@ -94,7 +94,6 @@ class FeedViewModel
 
         private suspend fun createPostUiModelList(): List<PostUiModel> {
             val postList = postRepository.getPostList()
-            val replyCounts = postRepository.getRepliesCounts()
             val favoriteUsers = favoriteUserRepository.getAllFavoriteUsers().first()
 
             return postList.map { currentPost ->
@@ -103,10 +102,15 @@ class FeedViewModel
                         savedUser.authorId == currentPost.authorId
                     }
 
+                val repliesCount =
+                    runCatching {
+                        postRepository.getRepliesByPostId(currentPost.id).size
+                    }.getOrDefault(0)
+
                 PostUiModel(
                     apiPostResponse = currentPost,
                     isMarkedAsFavorite = isSelectedAsFavorite,
-                    repliesCount = replyCounts[currentPost.id] ?: 0,
+                    repliesCount = repliesCount,
                 )
             }
         }

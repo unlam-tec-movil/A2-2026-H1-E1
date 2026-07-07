@@ -28,18 +28,33 @@ class PostCreationViewModel
         private val tokenManager: TokenManager,
     ) : BaseViewModel<String>() {
         private var parentId: Int = 0
+        private var selectedDraftId: Int? = null
 
         private val _message = MutableStateFlow("")
         val message: StateFlow<String> = _message.asStateFlow()
 
+        private val _drafts = MutableStateFlow<List<Draft>>(emptyList())
+        val drafts: StateFlow<List<Draft>> = _drafts.asStateFlow()
+
         init {
-            viewModelScope.launch {
-                checkAndLoadLastDraft()
-            }
+            loadDrafts()
         }
 
         fun setParentId(id: Int) {
             parentId = id
+        }
+
+        fun loadDrafts() {
+            viewModelScope.launch {
+                postRepository.getAllDrafts().collect { savedDrafts ->
+                    _drafts.value = savedDrafts
+                }
+            }
+        }
+
+        fun selectDraft(draft: Draft) {
+            selectedDraftId = draft.postId
+            _message.value = draft.postMessage
         }
 
         fun createPost() {
@@ -82,32 +97,25 @@ class PostCreationViewModel
                         postRepository.saveLocalReply(parentId, localReply)
                     }
 
+                    selectedDraftId?.let { draftId ->
+                        postRepository.deleteDraft(draftId)
+                    }
+
                     setUiAsSuccess(response.message)
-                    checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {
                     setUiAsError(exception.message ?: UNKNOWN_ERROR_MESSAGE)
                 }
             }
         }
 
-        private suspend fun checkAndLoadLastDraft() {
-            postRepository.getAllDrafts().collect { drafts ->
-                _message.value = drafts.lastOrNull()?.postMessage ?: ""
-            }
-        }
-
-        private suspend fun checkAndDeleteDraftIfNeeded() {
-            postRepository.getAllDrafts().collect { drafts ->
-                val lastId = drafts.lastOrNull()?.postId ?: 0
-                if (lastId > 0) postRepository.deleteDraft(lastId)
-                return@collect
-            }
-        }
-
         fun createDraft(draftMessage: String) {
             viewModelScope.launch {
-                postRepository.saveDraft(Draft(postMessage = draftMessage))
-                setUiAsSuccess(DRAFT_SAVED)
+                if (draftMessage.isNotBlank()) {
+                    postRepository.saveDraft(Draft(postMessage = draftMessage))
+                    _message.value = ""
+                    selectedDraftId = null
+                    setUiAsSuccess(DRAFT_SAVED)
+                }
             }
         }
 
