@@ -9,4 +9,5 @@ enum class AppScreen {
     FAVORITE_USER_POSTS,
     EDIT_PROFILE_INFO,
     USERS_MARKED_AS_FAVORITE,
+    REPLY_POST,
 }
