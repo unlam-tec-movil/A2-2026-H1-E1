@@ -1,17 +1,14 @@
 package ar.edu.unlam.mobile.scaffolding
 
 import android.os.Bundle
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Star
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,12 +19,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
@@ -54,16 +53,9 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import androidx.compose.material.icons.outlined.AccountCircle as AccountCircleOutlined
-import androidx.compose.material.icons.outlined.Home as HomeOutlined
-import androidx.compose.material.icons.outlined.Star as StarOutlined
-
-private const val HOME_LABEL = "Inicio"
-private const val FAVORITES_LABEL = "Favoritos"
-private const val PROFILE_LABEL = "Perfil"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -82,6 +74,19 @@ class MainActivity : ComponentActivity() {
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
+            val snackBarAction: (String) -> Unit = { message ->
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                val savedToken = tokenManager.tokenFlow.first()
+                if (savedToken.isNotEmpty()) {
+                    currentScreen = FEED
+                }
+            }
+
             ScaffoldingV2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -96,7 +101,9 @@ class MainActivity : ComponentActivity() {
                                 currentScreen == FAVORITE_USER_POSTS ||
                                 currentScreen == EDIT_PROFILE_INFO
                             ) {
-                                MainBottomBar(currentScreen) { currentScreen = it }
+                                MainBottomBar(currentScreen) { selectedScreen ->
+                                    currentScreen = selectedScreen
+                                }
                             }
                         },
                     ) { paddingValues ->
@@ -121,13 +128,7 @@ class MainActivity : ComponentActivity() {
                                             selectedPost = post
                                             currentScreen = POST_DETAIL
                                         },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                         onUnauthorized = {
                                             coroutineScope.launch {
                                                 tokenManager.clearToken()
@@ -143,26 +144,14 @@ class MainActivity : ComponentActivity() {
                                 CREATE_NEW_POST -> {
                                     GoToPostCreationScreen(
                                         onNavigate = { currentScreen = it },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                     )
                                 }
 
                                 REPLY_POST -> {
                                     GoToReplyScreen(
                                         onNavigate = { currentScreen = it },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                         replyParentPost = replyParentPost,
                                     )
                                 }
@@ -231,12 +220,12 @@ class MainActivity : ComponentActivity() {
         NavigationBar {
             NavigationBarItem(
                 selected = currentScreen == FEED,
-                label = { Text(HOME_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_home_button)) },
                 onClick = { onNavigate(FEED) },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Home,
-                        contentDescription = HOME_LABEL,
+                        contentDescription = stringResource(R.string.nav_bar_home_button),
                     )
                 },
             )
@@ -244,30 +233,31 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected =
                     currentScreen == USERS_MARKED_AS_FAVORITE ||
-                            currentScreen == FAVORITE_USER_POSTS,
-                label = { Text(FAVORITES_LABEL) },
+                        currentScreen == FAVORITE_USER_POSTS,
+                label = { Text(stringResource(R.string.nav_bar_favorites_button)) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Star,
-                        contentDescription = FAVORITES_LABEL,
+                        contentDescription = stringResource(R.string.nav_bar_favorites_button),
                     )
                 },
             )
 
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
-                label = { Text(PROFILE_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_profile_button)) },
                 onClick = { onNavigate(EDIT_PROFILE_INFO) },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
-                        contentDescription = PROFILE_LABEL,
+                        contentDescription = stringResource(R.string.nav_bar_profile_button),
                     )
                 },
             )
         }
     }
+
     @Composable
     private fun GoToLoginScreen(onNavigate: (AppScreen) -> Unit) {
         LoginScreen(
@@ -397,13 +387,5 @@ class MainActivity : ComponentActivity() {
             onBackAction = { onNavigate(FEED) },
             onFavoriteUserClick = onFavoriteUserClick,
         )
-    }
-
-    private fun launchSnackBarCoroutine(
-        snackbarHostState: SnackbarHostState,
-        snackBarMessage: String,
-        coroutineScope: CoroutineScope,
-    ) {
-        coroutineScope.launch { snackbarHostState.showSnackbar(snackBarMessage) }
     }
 }

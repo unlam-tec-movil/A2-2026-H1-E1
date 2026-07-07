@@ -8,10 +8,19 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localPostCreationResponse1
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localPostCreationResponse2
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localReply
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.samplePostResponseList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import retrofit2.HttpException
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+
+private const val STARTING_POST_PAGE_INDEX = 1
+private const val MAX_PAGE_VALUE = 20
 
 class PostRepositoryImpl
     @Inject
@@ -28,16 +37,16 @@ class PostRepositoryImpl
         ): PostCreationResponse =
             try {
                 tuiterApiService.createPost(createPostRequest, userToken)
-            } catch (_: Exception) {
-                PostCreationResponse("Post creado offline")
+            } catch (_: IOException) {
+                localPostCreationResponse1
             }
 
         override suspend fun getPostList(): List<PostResponse> {
-            val token = tokenManager.tokenFlow.first()
+            val token = getToken()
             val allPosts = mutableListOf<PostResponse>()
-            var page = 1
+            var page = STARTING_POST_PAGE_INDEX
 
-            while (allPosts.size < 20) {
+            while (allPosts.size < MAX_PAGE_VALUE) {
                 val posts =
                     try {
                         tuiterApiService.getPosts(
@@ -45,10 +54,10 @@ class PostRepositoryImpl
                             pageNumber = page,
                             onlyParents = true,
                         )
-                    } catch (exception: retrofit2.HttpException) {
+                    } catch (exception: HttpException) {
                         throw exception
-                    } catch (_: java.io.IOException) {
-                        return getOfflinePosts()
+                    } catch (_: IOException) {
+                        return samplePostResponseList
                     }
 
                 if (posts.isEmpty()) break
@@ -57,13 +66,13 @@ class PostRepositoryImpl
                 page++
             }
 
-            return allPosts.take(20)
+            return allPosts.take(MAX_PAGE_VALUE)
         }
 
         override suspend fun getPostById(postId: Int): PostResponse =
             tuiterApiService.getPostById(
                 postId = postId,
-                userToken = tokenManager.tokenFlow.first(),
+                userToken = getToken(),
             )
 
         override suspend fun getRepliesByPostId(postId: Int): List<PostResponse> {
@@ -72,11 +81,11 @@ class PostRepositoryImpl
                     val response =
                         tuiterApiService.getRepliesByPostId(
                             postId = postId,
-                            userToken = tokenManager.tokenFlow.first(),
+                            userToken = getToken(),
                         )
 
                     response.body() ?: emptyList()
-                } catch (_: Exception) {
+                } catch (_: IOException) {
                     emptyList()
                 }
 
@@ -97,13 +106,13 @@ class PostRepositoryImpl
                 try {
                     tuiterApiService
                         .getPosts(
-                            userToken = tokenManager.tokenFlow.first(),
-                            pageNumber = 1,
+                            userToken = getToken(),
+                            pageNumber = STARTING_POST_PAGE_INDEX,
                             onlyParents = false,
                         ).filter { it.parentId > 0 }
                         .groupBy { it.parentId }
                         .mapValues { it.value.size }
-                } catch (_: Exception) {
+                } catch (_: IOException) {
                     emptyMap()
                 }
 
@@ -130,7 +139,7 @@ class PostRepositoryImpl
         ) {
             try {
                 tuiterApiService.likePost(postId, userToken)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 // offline mode - ignore
             }
         }
@@ -141,7 +150,7 @@ class PostRepositoryImpl
         ) {
             try {
                 tuiterApiService.unlikePost(postId, userToken)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 // offline mode - ignore
             }
         }
@@ -157,47 +166,10 @@ class PostRepositoryImpl
                     request = createPostRequest,
                     userToken = userToken,
                 )
-            } catch (_: Exception) {
-                val localReply =
-                    PostResponse(
-                        id = System.currentTimeMillis().toInt(),
-                        message = createPostRequest.message,
-                        parentId = parentPostId,
-                        authorId = 0,
-                        author = "Usuario local",
-                        avatarUrl = "",
-                        likes = 0,
-                        liked = false,
-                        date = "2026-01-01",
-                    )
-
+            } catch (_: IOException) {
                 saveLocalReply(parentPostId, localReply)
-                PostCreationResponse("Respuesta creada offline")
+                localPostCreationResponse2
             }
 
-        private fun getOfflinePosts(): List<PostResponse> =
-            listOf(
-                PostResponse(
-                    id = 1,
-                    message = "Este es un post de prueba offline",
-                    parentId = 0,
-                    authorId = 1,
-                    author = "Usuario Offline",
-                    avatarUrl = "",
-                    likes = 42,
-                    liked = false,
-                    date = "2024-01-01T00:00:00Z",
-                ),
-                PostResponse(
-                    id = 2,
-                    message = "La API está caída, pero seguimos posteando",
-                    parentId = 0,
-                    authorId = 2,
-                    author = "Tuiter Offline",
-                    avatarUrl = "",
-                    likes = 17,
-                    liked = true,
-                    date = "2024-01-02T00:00:00Z",
-                ),
-            )
+        private suspend fun getToken(): String = tokenManager.tokenFlow.first()
     }

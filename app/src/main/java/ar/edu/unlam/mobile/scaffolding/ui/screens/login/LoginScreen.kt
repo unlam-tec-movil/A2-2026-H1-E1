@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -55,12 +56,12 @@ fun LoginScreen(
     when (val state = uiState) {
         is UiState.Idle -> {
             ShowLoginForm(
-                emailState,
-                passwordState,
-                { loginViewModel.updateEmailState(it) },
-                { loginViewModel.updatePasswordState(it) },
-                { loginViewModel.login() },
-                onNavigateToRegister,
+                email = emailState,
+                password = passwordState,
+                onEmailChange = { loginViewModel.updateEmailState(it) },
+                onPasswordChange = { loginViewModel.updatePasswordState(it) },
+                onLoginClick = { loginViewModel.login() },
+                onRegisterClick = onNavigateToRegister,
             )
         }
 
@@ -77,12 +78,12 @@ fun LoginScreen(
 
         is UiState.Error -> {
             ShowLoginForm(
-                emailState,
-                passwordState,
-                { loginViewModel.updateEmailState(it) },
-                { loginViewModel.updatePasswordState(it) },
-                { loginViewModel.login() },
-                onNavigateToRegister,
+                email = emailState,
+                password = passwordState,
+                onEmailChange = { loginViewModel.updateEmailState(it) },
+                onPasswordChange = { loginViewModel.updatePasswordState(it) },
+                onLoginClick = { loginViewModel.login() },
+                onRegisterClick = onNavigateToRegister,
                 errorMessage = state.error,
             )
         }
@@ -177,6 +178,24 @@ private fun ShowLoginForm(
                     )
                 }
 
+                Row(
+                    modifier = Modifier.padding(top = PADDING_LARGE),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Checkbox(
+                        checked = false,
+                        onCheckedChange = null,
+                    )
+
+                    TuiterTextLabel(
+                        textId = R.string.keep_session_credentials,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TuiterButton(
@@ -203,7 +222,6 @@ private fun ShowLoginForm(
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

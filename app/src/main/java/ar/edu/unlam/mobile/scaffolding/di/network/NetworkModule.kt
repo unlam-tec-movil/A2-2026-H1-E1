@@ -52,6 +52,7 @@ object NetworkModule {
         gson: Gson,
         okHttpClient: OkHttpClient,
     ): Retrofit =
+
         Retrofit
             .Builder()
             .baseUrl("https://tuiter.fragua.com.ar/")

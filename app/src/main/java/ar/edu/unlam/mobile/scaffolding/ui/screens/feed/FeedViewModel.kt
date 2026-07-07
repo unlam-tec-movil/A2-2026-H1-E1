@@ -116,7 +116,7 @@ class FeedViewModel
         }
 
         private fun updateFavoritePosts(user: FavoriteUser) {
-            val currentUiState = _uiState.value
+            val currentUiState = uiStateFlow.value
 
             if (currentUiState is UiState.Success) {
                 val updatedPostList =
@@ -133,7 +133,7 @@ class FeedViewModel
         }
 
         private fun removeFromFavorites(authorId: Int) {
-            val currentUiState = _uiState.value
+            val currentUiState = uiStateFlow.value
 
             if (currentUiState is UiState.Success) {
                 val updatedPostList =

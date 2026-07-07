@@ -7,23 +7,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 abstract class BaseViewModel<T> : ViewModel() {
-    @Suppress("ktlint:standard:backing-property-naming")
-    protected val _uiState = MutableStateFlow<UiState<T>>(UiState.Idle)
-    val uiState: StateFlow<UiState<T>> = _uiState.asStateFlow()
+    protected val uiStateFlow = MutableStateFlow<UiState<T>>(UiState.Idle)
+    val uiState: StateFlow<UiState<T>> = uiStateFlow.asStateFlow()
 
     fun setUiAsIdle() {
-        _uiState.value = UiState.Idle
+        uiStateFlow.value = UiState.Idle
     }
 
     fun setUiAsLoading() {
-        _uiState.value = UiState.Loading
+        uiStateFlow.value = UiState.Loading
     }
 
     fun setUiAsSuccess(data: T) {
-        _uiState.value = UiState.Success(data)
+        uiStateFlow.value = UiState.Success(data)
     }
 
     fun setUiAsError(error: String) {
-        _uiState.value = UiState.Error(error)
+        uiStateFlow.value = UiState.Error(error)
     }
 }
