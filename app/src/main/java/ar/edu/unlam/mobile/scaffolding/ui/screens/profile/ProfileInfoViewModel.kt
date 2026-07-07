@@ -79,10 +79,6 @@ class ProfileInfoViewModel
             _email.value = newEmail
         }
 
-        fun onAvatarURLChange(newUrl: String) {
-            _avatarUrl.value = newUrl
-        }
-
         fun onNewPasswordChange(newPassword: String) {
             _newPassword.value = newPassword
         }

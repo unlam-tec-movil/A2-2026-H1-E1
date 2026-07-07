@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
@@ -54,10 +55,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val HOME_LABEL = "Inicio"
-private const val FAVORITES_LABEL = "Favoritos"
-private const val PROFILE_LABEL = "Perfil"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -90,7 +87,6 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         bottomBar = {
-                            @Suppress("ktlint:standard:max-line-length")
                             if (currentScreen == FEED ||
                                 currentScreen == USERS_MARKED_AS_FAVORITE ||
                                 currentScreen == EDIT_PROFILE_INFO
@@ -204,21 +200,21 @@ class MainActivity : ComponentActivity() {
         NavigationBar {
             NavigationBarItem(
                 selected = currentScreen == FEED,
-                label = { Text(HOME_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_home_button)) },
                 onClick = { onNavigate(FEED) },
                 icon = { Icon(Icons.AutoMirrored.Filled.Feed, contentDescription = null) },
             )
 
             NavigationBarItem(
                 selected = currentScreen == USERS_MARKED_AS_FAVORITE,
-                label = { Text(FAVORITES_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_favorites_button)) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
                 icon = { Icon(Icons.Default.Star, contentDescription = null) },
             )
 
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
-                label = { Text(PROFILE_LABEL) },
+                label = { Text(stringResource(R.string.nav_bar_profile_button)) },
                 onClick = { onNavigate(EDIT_PROFILE_INFO) },
                 icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
             )

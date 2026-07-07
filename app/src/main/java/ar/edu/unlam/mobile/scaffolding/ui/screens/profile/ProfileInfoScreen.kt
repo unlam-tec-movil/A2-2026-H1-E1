@@ -48,7 +48,6 @@ fun ProfileScreen(
     val uiState by profileInfoViewModel.uiState.collectAsState()
     val currentName by profileInfoViewModel.name.collectAsState()
     val currentEmail by profileInfoViewModel.email.collectAsState()
-    val currentAvatarURL by profileInfoViewModel.avatarUrl.collectAsState()
     val newPassword by profileInfoViewModel.newPassword.collectAsState()
     val newConfirmPassword by profileInfoViewModel.newPasswordConfirm.collectAsState()
     val isSavingStatus by profileInfoViewModel.isSaving.collectAsState()
