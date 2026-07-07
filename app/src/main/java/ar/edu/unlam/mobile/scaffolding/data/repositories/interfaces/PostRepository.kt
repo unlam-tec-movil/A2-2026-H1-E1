@@ -14,11 +14,20 @@ interface PostRepository {
 
     suspend fun getPostList(): List<PostResponse>
 
+    suspend fun getRepliesForPost(postId: Int): List<PostResponse>
+
+    suspend fun saveLocalReply(
+        parentPostId: Int,
+        reply: PostResponse,
+    )
+
     suspend fun saveDraft(draft: Draft)
 
     suspend fun deleteDraft(draftId: Int)
 
     fun getAllDrafts(): Flow<List<Draft>>
+
+    suspend fun getRepliesCounts(): Map<Int, Int>
 
     suspend fun likePost(
         postId: Int,

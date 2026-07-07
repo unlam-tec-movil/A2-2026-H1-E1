@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,10 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -81,32 +89,46 @@ private fun ShowLoginForm(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
 ) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer,
+                            ),
+                    ),
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(PADDING_LARGE),
-            shape = RoundedCornerShape(PADDING_LARGE),
+                    .padding(horizontal = 32.dp)
+                    .alpha(if (visible) 1f else 0f),
+            shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp,
-            shadowElevation = 4.dp,
+            shadowElevation = 8.dp,
         ) {
             Column(
                 modifier = Modifier.padding(PADDING_LARGE),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
             ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     text = "Tuiter",
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
 
@@ -114,8 +136,10 @@ private fun ShowLoginForm(
                     R.string.login_title_label,
                     MaterialTheme.typography.titleMedium,
                     MaterialTheme.colorScheme.onSurfaceVariant,
-                    Modifier.padding(bottom = PADDING_LARGE),
+                    Modifier.padding(top = 4.dp),
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 TuiterOutlinedTextField(
                     email,
@@ -127,9 +151,7 @@ private fun ShowLoginForm(
                 TuiterOutlinedTextField(
                     password,
                     onPasswordChange,
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = PADDING_MEDIUM),
+                    Modifier.fillMaxWidth(),
                     R.string.password_label,
                     PasswordVisualTransformation(),
                     KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -151,21 +173,20 @@ private fun ShowLoginForm(
                         modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
                     )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 TuiterButton(
                     R.string.sign_in,
                     onLoginClick,
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = PADDING_LARGE),
+                    Modifier.fillMaxWidth(),
                 )
 
                 TuiterTextLabel(
                     R.string.not_user_yet,
                     MaterialTheme.typography.bodyMedium,
                     MaterialTheme.colorScheme.onSurfaceVariant,
-                    Modifier.padding(top = PADDING_LARGE, bottom = PADDING_MEDIUM),
+                    Modifier.padding(top = 8.dp),
                 )
 
                 TuiterButton(

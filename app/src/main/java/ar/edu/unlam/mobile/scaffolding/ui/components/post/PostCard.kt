@@ -1,6 +1,10 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components.post
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +29,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,80 +47,85 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARG
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun PostCard(
     post: PostResponse,
     isSelectedAsFavorite: Boolean,
+    replyCount: Int = 0,
     onSelectedAsFavoriteAction: () -> Unit,
+    onClick: () -> Unit = {},
+    onUserClick: () -> Unit = {},
     onReply: () -> Unit = {},
     onLike: () -> Unit = {},
 ) {
     Surface(
         modifier =
             Modifier
-                .padding(PADDING_MEDIUM)
+                .padding(horizontal = PADDING_LARGE, vertical = PADDING_SMALL)
                 .fillMaxWidth(),
-        shape = RoundedCornerShape(PADDING_LARGE),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
-        Row(modifier = Modifier.padding(PADDING_MEDIUM)) {
-            PostAvatar()
+        Column(modifier = Modifier.padding(PADDING_MEDIUM)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PostAvatar(onClick = onUserClick)
 
-            Spacer(modifier = Modifier.width(PADDING_MEDIUM))
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(PADDING_SMALL),
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
-                    PostText(
-                        post.author,
-                        MaterialTheme.typography.titleMedium,
-                        MaterialTheme.colorScheme.onSurface,
-                    )
-
-                    PostText(
-                        "@usuario",
-                        MaterialTheme.typography.bodyMedium,
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    IconButton(onClick = onSelectedAsFavoriteAction) {
-                        Icon(
-                            imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                            contentDescription = null,
-                        )
-                    }
-                }
+                Spacer(modifier = Modifier.width(PADDING_SMALL))
 
                 PostText(
-                    post.message,
-                    MaterialTheme.typography.bodyMedium,
+                    post.author,
+                    MaterialTheme.typography.titleMedium,
                     MaterialTheme.colorScheme.onSurface,
+                    onClick = onUserClick,
+                    modifier = Modifier.weight(1f),
                 )
 
-                PostActions(
-                    likes = post.likes,
-                    liked = post.liked,
-                    onReply = onReply,
-                    onLike = onLike,
-                )
+                IconButton(onClick = onSelectedAsFavoriteAction) {
+                    Icon(
+                        imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                        contentDescription = null,
+                    )
+                }
             }
+
+            PostText(
+                post.message,
+                MaterialTheme.typography.bodyMedium,
+                MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.clickable(onClick = onClick),
+            )
+
+            PostText(
+                formatDate(post.date),
+                MaterialTheme.typography.bodySmall,
+                MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            PostActions(
+                likes = post.likes,
+                liked = post.liked,
+                replyCount = replyCount,
+                onReply = onReply,
+                onLike = onLike,
+            )
         }
     }
 }
 
 @Composable
-private fun PostAvatar() {
+private fun PostAvatar(onClick: () -> Unit = {}) {
     Box(
         modifier =
             Modifier
                 .size(AVATAR_SIZE)
                 .clip(CircleShape)
+                .clickable(onClick = onClick)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center,
     ) {
@@ -128,12 +142,17 @@ private fun PostText(
     textToShow: String,
     textStyle: TextStyle,
     textColor: Color,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
 ) {
     Text(
         text = textToShow,
         style = textStyle,
         color = textColor,
-        modifier = Modifier.padding(PADDING_SMALL),
+        modifier =
+            modifier.padding(PADDING_SMALL).then(
+                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+            ),
     )
 }
 
@@ -141,9 +160,15 @@ private fun PostText(
 private fun PostActions(
     likes: Int,
     liked: Boolean,
+    replyCount: Int = 0,
     onReply: () -> Unit,
     onLike: () -> Unit,
 ) {
+    var likedState by remember { mutableStateOf(liked) }
+    val scale by animateFloatAsState(
+        targetValue = if (likedState) 1.15f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = 600f),
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -152,11 +177,17 @@ private fun PostActions(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onLike) {
+            IconButton(
+                onClick = {
+                    likedState = !likedState
+                    onLike()
+                },
+            ) {
                 Icon(
-                    if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    modifier = Modifier.scale(scale),
+                    imageVector = if (likedState) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Me gusta",
-                    tint = if (liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (likedState) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -167,8 +198,20 @@ private fun PostActions(
             )
         }
 
-        IconButton(onClick = onReply) {
-            Icon(Icons.Default.Replay, contentDescription = "Responder")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onReply) {
+                Icon(Icons.Default.Replay, contentDescription = "Responder")
+            }
+
+            if (replyCount > 0) {
+                Text(
+                    text = "$replyCount",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -197,3 +240,28 @@ private fun PostCardPreview() {
         )
     }
 }
+
+private fun formatDate(dateString: String): String =
+    try {
+        val inputFormats =
+            listOf(
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+                "yyyy-MM-dd",
+            )
+        val parsed =
+            inputFormats.firstNotNullOfOrNull { format ->
+                try {
+                    SimpleDateFormat(format, Locale.getDefault()).parse(dateString)
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        if (parsed != null) {
+            SimpleDateFormat("dd MMM yyyy HH:mm", Locale("es")).format(parsed)
+        } else {
+            dateString
+        }
+    } catch (_: Exception) {
+        dateString
+    }

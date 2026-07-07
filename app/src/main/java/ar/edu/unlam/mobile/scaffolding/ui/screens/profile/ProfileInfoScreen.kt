@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.profile
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.components.shared.TuiterButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.TuiterOutlinedTextField
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
-import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
@@ -43,6 +43,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 fun ProfileScreen(
     profileInfoViewModel: ProfileInfoViewModel,
     onNavigateBackAction: () -> Unit,
+    onLogout: () -> Unit = {},
 ) {
     val uiState by profileInfoViewModel.uiState.collectAsState()
     val currentName by profileInfoViewModel.name.collectAsState()
@@ -80,6 +81,7 @@ fun ProfileScreen(
                 newConfirmPassword,
                 profileInfoViewModel,
                 isSavingStatus,
+                onLogout,
             )
         }
 
@@ -95,41 +97,43 @@ fun ShowProfileForm(
     newConfirmPassword: String,
     profileInfoViewModel: ProfileInfoViewModel,
     isSavingStatus: Boolean,
+    onLogout: () -> Unit = {},
 ) {
     Surface(
         modifier =
             Modifier
                 .padding(PADDING_MEDIUM)
                 .fillMaxSize(),
-        shape = RoundedCornerShape(PADDING_MEDIUM),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp,
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.fillMaxWidth().padding(PADDING_LARGE),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
                     text = stringResource(R.string.user_profile_title_label),
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
 
             Surface(
                 modifier =
                     Modifier
-                        .padding(PADDING_MEDIUM)
+                        .padding(horizontal = PADDING_MEDIUM)
                         .fillMaxSize(),
-                shape = RoundedCornerShape(PADDING_LARGE),
+                shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 tonalElevation = 1.dp,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
             ) {
                 Column(
                     modifier =
@@ -161,6 +165,19 @@ fun ShowProfileForm(
                     ConfirmChangesButton(
                         { profileInfoViewModel.sendProfileInfoUpdate() },
                         isSavingStatus,
+                    )
+
+                    TuiterButton(
+                        textId = R.string.logout,
+                        onClickAction = onLogout,
+                        buttonColor =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(PADDING_MEDIUM),
                     )
                 }
             }
@@ -204,9 +221,10 @@ fun EmailTextfield(
 fun ShowPasswordHelp() {
     Surface(
         modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
-        shape = RoundedCornerShape(PADDING_MEDIUM),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 1.dp,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
     ) {
         Column(
             modifier = Modifier.padding(PADDING_MEDIUM),
@@ -326,7 +344,7 @@ fun ConfirmChangesButton(
         textId = R.string.confirm,
         onClickAction = onConfirmChangesAction,
         buttonColor = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        modifier = Modifier.padding(PADDING_SMALL),
+        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
         isEnabled = !enabledStatus,
     )
 }

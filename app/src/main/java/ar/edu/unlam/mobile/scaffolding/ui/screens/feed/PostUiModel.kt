@@ -5,4 +5,5 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 data class PostUiModel(
     val apiPostResponse: PostResponse,
     val isMarkedAsFavorite: Boolean,
+    val replyCount: Int = 0,
 )

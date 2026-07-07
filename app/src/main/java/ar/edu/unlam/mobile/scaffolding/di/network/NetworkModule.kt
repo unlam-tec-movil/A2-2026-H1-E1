@@ -20,6 +20,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -29,10 +30,32 @@ import javax.inject.Singleton
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideRetrofit(gson: Gson): Retrofit =
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor { chain ->
+                val request =
+                    chain
+                        .request()
+                        .newBuilder()
+                        .addHeader(
+                            "Application-Token",
+                            ar.edu.unlam.mobile.scaffolding.BuildConfig.APPLICATION_TOKEN,
+                        ).build()
+
+                chain.proceed(request)
+            }.build()
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(
+        gson: Gson,
+        okHttpClient: OkHttpClient,
+    ): Retrofit =
         Retrofit
             .Builder()
             .baseUrl("https://tuiter.fragua.com.ar/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
