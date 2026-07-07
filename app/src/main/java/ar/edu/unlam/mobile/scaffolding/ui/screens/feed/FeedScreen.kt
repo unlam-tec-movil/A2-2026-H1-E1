@@ -2,16 +2,13 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -40,8 +37,8 @@ private const val REMOVED_FROM_FAVORITE = "Usuario eliminado de favoritos"
 fun FeedScreen(
     feedViewModel: FeedViewModel,
     onNavigateToCreatePost: () -> Unit,
-    onNavigateToReply: (Int) -> Unit = {},
-    onNavigateToPostDetail: (Int) -> Unit = {},
+    onNavigateToReply: (PostResponse) -> Unit,
+    onNavigateToPostDetail: (PostResponse) -> Unit = {},
     onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
@@ -54,22 +51,25 @@ fun FeedScreen(
         topBar = { TopBar() },
         floatingActionButton = { HomeFloatingActionButton(onNavigateToCreatePost) },
     ) { paddingValues ->
-
         FeedContent(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
             onRetryAction = { feedViewModel.reloadPostList() },
-            onSelectedAsFavoriteAction = { author, avatarUrl, isMarkedAsFavorite ->
+            onSelectedAsFavoriteAction = { authorId, author, avatarUrl, isMarkedAsFavorite ->
                 if (isMarkedAsFavorite) {
-                    feedViewModel.unmarkUserFromFavorites(author)
+                    feedViewModel.unmarkUserFromFavorites(authorId)
                     onShowSnackbar(REMOVED_FROM_FAVORITE)
                 } else {
-                    feedViewModel.markUserAsFavorite(author, avatarUrl)
+                    feedViewModel.markUserAsFavorite(
+                        authorId = authorId,
+                        author = author,
+                        avatarUrl = avatarUrl,
+                    )
                     onShowSnackbar(MARKED_AS_FAVORITE)
                 }
             },
-            onReply = { postId -> onNavigateToReply(postId) },
-            onPostClick = { postId -> onNavigateToPostDetail(postId) },
+            onReply = { post -> onNavigateToReply(post) },
+            onPostClick = { post -> onNavigateToPostDetail(post) },
             onLike = { post ->
                 if (post.liked) {
                     feedViewModel.unlikePost(post.id)
@@ -99,22 +99,21 @@ private fun TopBar() {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FeedContent(
     modifier: Modifier,
     uiState: UiState<List<PostUiModel>>,
     onRetryAction: () -> Unit,
-    onSelectedAsFavoriteAction: (String, String, Boolean) -> Unit,
-    onReply: (Int) -> Unit,
-    onPostClick: (Int) -> Unit,
+    onSelectedAsFavoriteAction: (Int, String, String, Boolean) -> Unit,
+    onReply: (PostResponse) -> Unit,
     onLike: (PostResponse) -> Unit,
+    onPostClick: (PostResponse) -> Unit,
 ) {
-    var selectedUser by remember { mutableStateOf<PostResponse?>(null) }
     var isRefreshing by remember { mutableStateOf(false) }
 
     Box(
-        modifier =
-            modifier.background(MaterialTheme.colorScheme.background),
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) {
         when (uiState) {
             is UiState.Idle -> {}
@@ -134,25 +133,24 @@ private fun FeedContent(
                 ) {
                     LazyColumn {
                         items(uiState.data) { post ->
-
                             val apiResponse = post.apiPostResponse
                             val markedAsFavoriteValue = post.isMarkedAsFavorite
 
                             PostCard(
                                 post = apiResponse,
                                 isSelectedAsFavorite = markedAsFavoriteValue,
-                                replyCount = post.replyCount,
                                 onSelectedAsFavoriteAction = {
                                     onSelectedAsFavoriteAction(
+                                        apiResponse.authorId,
                                         apiResponse.author,
                                         apiResponse.avatarUrl,
                                         markedAsFavoriteValue,
                                     )
                                 },
-                                onClick = { onPostClick(apiResponse.id) },
-                                onUserClick = { selectedUser = apiResponse },
-                                onReply = { onReply(apiResponse.id) },
+                                repliesCount = post.repliesCount,
+                                onReply = { onReply(apiResponse) },
                                 onLike = { onLike(apiResponse) },
+                                onPostClick = { onPostClick(apiResponse) },
                             )
                         }
                     }
@@ -166,27 +164,6 @@ private fun FeedContent(
                 )
             }
         }
-    }
-
-    if (selectedUser != null) {
-        val user = selectedUser!!
-        AlertDialog(
-            onDismissRequest = { selectedUser = null },
-            title = { Text(user.author) },
-            text = {
-                Column {
-                    Text("ID: ${user.authorId}")
-                    if (user.avatarUrl.isNotEmpty()) {
-                        Text("Avatar: ${user.avatarUrl}")
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { selectedUser = null }) {
-                    Text("Cerrar")
-                }
-            },
-        )
     }
 }
 
@@ -209,6 +186,7 @@ private fun FeedContentPreview() {
                         date = "2024-01-01",
                     ),
                 isMarkedAsFavorite = false,
+                repliesCount = 2,
             ),
             PostUiModel(
                 apiPostResponse =
@@ -224,6 +202,7 @@ private fun FeedContentPreview() {
                         date = "2024-01-02",
                     ),
                 isMarkedAsFavorite = true,
+                repliesCount = 0,
             ),
         )
 
@@ -235,7 +214,7 @@ private fun FeedContentPreview() {
             onReply = {},
             onPostClick = {},
             onLike = {},
-            onSelectedAsFavoriteAction = { _, _, _ -> },
+            onSelectedAsFavoriteAction = { _, _, _, _ -> },
         )
     }
 }

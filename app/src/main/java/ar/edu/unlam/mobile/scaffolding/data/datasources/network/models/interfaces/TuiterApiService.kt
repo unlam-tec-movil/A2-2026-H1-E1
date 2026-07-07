@@ -14,7 +14,6 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -67,10 +66,22 @@ interface TuiterApiService {
         @Header("Authorization") userToken: String,
     )
 
-    @GET("/api/v1/me/tuits/{tuit_id}/replies")
-    @Headers("Application-Token: f6b67b050d16483ee05ce7563a5f8f246a85ea4eec3cde1064a3bc82ddddd921")
-    suspend fun getRepliesList(
+    @GET("api/v1/me/tuits/{tuit_id}")
+    suspend fun getPostById(
+        @Path("tuit_id") postId: Int,
         @Header("Authorization") userToken: String,
-        @Path("tuit_id") tuitId: Int,
+    ): PostResponse
+
+    @GET("api/v1/me/tuits/{tuit_id}/replies")
+    suspend fun getRepliesByPostId(
+        @Path("tuit_id") postId: Int,
+        @Header("Authorization") userToken: String,
     ): Response<List<PostResponse>>
+
+    @POST("api/v1/me/tuits/{tuit_id}/replies")
+    suspend fun createReply(
+        @Path("tuit_id") parentPostId: Int,
+        @Body request: PostCreationRequest,
+        @Header("Authorization") userToken: String,
+    ): PostCreationResponse
 }

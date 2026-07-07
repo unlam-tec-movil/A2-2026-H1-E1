@@ -14,6 +14,10 @@ interface PostRepository {
 
     suspend fun getPostList(): List<PostResponse>
 
+    suspend fun getPostById(postId: Int): PostResponse
+
+    suspend fun getRepliesByPostId(postId: Int): List<PostResponse>
+
     suspend fun getRepliesForPost(postId: Int): List<PostResponse>
 
     suspend fun saveLocalReply(
@@ -38,4 +42,10 @@ interface PostRepository {
         postId: Int,
         userToken: String,
     )
+
+    suspend fun createReply(
+        parentPostId: Int,
+        createPostRequest: PostCreationRequest,
+        userToken: String,
+    ): PostCreationResponse
 }
