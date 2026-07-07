@@ -20,8 +20,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.samplePostsForFeedPreview
 import ar.edu.unlam.mobile.scaffolding.ui.components.feed.HomeFloatingActionButton
 import ar.edu.unlam.mobile.scaffolding.ui.components.post.PostCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.shared.ShimmerFeed
@@ -29,9 +32,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDI
 import ar.edu.unlam.mobile.scaffolding.ui.screens.interfaces.UiState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.ShowErrorMessageOnScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
-
-private const val MARKED_AS_FAVORITE = "Usuario marcado como favorito"
-private const val REMOVED_FROM_FAVORITE = "Usuario eliminado de favoritos"
 
 @Composable
 fun FeedScreen(
@@ -42,6 +42,8 @@ fun FeedScreen(
     onShowSnackbar: (String) -> Unit,
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
+    val markedAsFavoriteSnackbar = stringResource(R.string.marked_as_favorite_snackbar)
+    val unmarkedFromFavoritesSnackbar = stringResource(R.string.unmarked_from_favorite_snackbar)
 
     LaunchedEffect(true) {
         feedViewModel.loadPosts()
@@ -56,26 +58,17 @@ fun FeedScreen(
             uiState = uiState,
             onRetryAction = { feedViewModel.reloadPostList() },
             onSelectedAsFavoriteAction = { authorId, author, avatarUrl, isMarkedAsFavorite ->
+                feedViewModel.toggleUserFavorite(authorId, author, avatarUrl, isMarkedAsFavorite)
                 if (isMarkedAsFavorite) {
-                    feedViewModel.unmarkUserFromFavorites(authorId)
-                    onShowSnackbar(REMOVED_FROM_FAVORITE)
+                    onShowSnackbar(unmarkedFromFavoritesSnackbar)
                 } else {
-                    feedViewModel.markUserAsFavorite(
-                        authorId = authorId,
-                        author = author,
-                        avatarUrl = avatarUrl,
-                    )
-                    onShowSnackbar(MARKED_AS_FAVORITE)
+                    onShowSnackbar(markedAsFavoriteSnackbar)
                 }
             },
             onReply = { post -> onNavigateToReply(post) },
             onPostClick = { post -> onNavigateToPostDetail(post) },
             onLike = { post ->
-                if (post.liked) {
-                    feedViewModel.unlikePost(post.id)
-                } else {
-                    feedViewModel.likePost(post.id)
-                }
+                feedViewModel.togglePostLike(post.id, post.liked)
             },
         )
     }
@@ -170,46 +163,10 @@ private fun FeedContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun FeedContentPreview() {
-    val samplePosts =
-        listOf(
-            PostUiModel(
-                apiPostResponse =
-                    PostResponse(
-                        id = 1,
-                        author = "Usuario1",
-                        message = "Este es un post de ejemplo para la preview del feed",
-                        likes = 10,
-                        liked = false,
-                        avatarUrl = "",
-                        parentId = 0,
-                        authorId = 1,
-                        date = "2024-01-01",
-                    ),
-                isMarkedAsFavorite = false,
-                repliesCount = 2,
-            ),
-            PostUiModel(
-                apiPostResponse =
-                    PostResponse(
-                        id = 2,
-                        author = "Usuario2",
-                        message = "Otro post interesante en el feed",
-                        likes = 5,
-                        liked = true,
-                        avatarUrl = "",
-                        parentId = 0,
-                        authorId = 2,
-                        date = "2024-01-02",
-                    ),
-                isMarkedAsFavorite = true,
-                repliesCount = 0,
-            ),
-        )
-
     ScaffoldingV2Theme {
         FeedContent(
             modifier = Modifier.padding(PADDING_MEDIUM),
-            uiState = UiState.Success(samplePosts),
+            uiState = UiState.Success(samplePostsForFeedPreview),
             onRetryAction = {},
             onReply = {},
             onPostClick = {},

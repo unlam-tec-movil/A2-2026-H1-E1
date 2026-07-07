@@ -4,6 +4,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.login.Log
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoResponse
+import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.PostUiModel
 
 val samplePostResponseList =
     listOf(
@@ -52,4 +53,40 @@ val localProfileInfoResponse =
         name = "Usuario Offline",
         avatarUrl = "",
         email = "offline@tuiter.com",
+    )
+
+val samplePostsForFeedPreview =
+    listOf(
+        PostUiModel(
+            apiPostResponse =
+                PostResponse(
+                    id = 1,
+                    author = "Usuario1",
+                    message = "Este es un post de ejemplo para la preview del feed",
+                    likes = 10,
+                    liked = false,
+                    avatarUrl = "",
+                    parentId = 0,
+                    authorId = 1,
+                    date = "2024-01-01",
+                ),
+            isMarkedAsFavorite = false,
+            repliesCount = 2,
+        ),
+        PostUiModel(
+            apiPostResponse =
+                PostResponse(
+                    id = 2,
+                    author = "Usuario2",
+                    message = "Otro post interesante en el feed",
+                    likes = 5,
+                    liked = true,
+                    avatarUrl = "",
+                    parentId = 0,
+                    authorId = 2,
+                    date = "2024-01-02",
+                ),
+            isMarkedAsFavorite = true,
+            repliesCount = 0,
+        ),
     )
