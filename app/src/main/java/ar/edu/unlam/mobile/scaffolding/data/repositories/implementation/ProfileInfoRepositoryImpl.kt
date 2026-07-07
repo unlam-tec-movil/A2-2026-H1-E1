@@ -5,6 +5,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.P
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoUpdateRequest
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.ProfileInfoRepository
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localProfileInfoResponse
 import javax.inject.Inject
 
 class ProfileInfoRepositoryImpl
@@ -16,11 +17,7 @@ class ProfileInfoRepositoryImpl
             try {
                 tuiterApiService.getProfileInfo(profileInfoRequest.token)
             } catch (_: Exception) {
-                ProfileInfoResponse(
-                    name = "Usuario Offline",
-                    avatarUrl = "",
-                    email = "offline@tuiter.com",
-                )
+                localProfileInfoResponse
             }
 
         override suspend fun updateProfileInfo(
@@ -30,10 +27,6 @@ class ProfileInfoRepositoryImpl
             try {
                 tuiterApiService.updateProfile(token, profileInfoUpdateRequest)
             } catch (_: Exception) {
-                ProfileInfoResponse(
-                    name = profileInfoUpdateRequest.name,
-                    avatarUrl = profileInfoUpdateRequest.avatarUrl,
-                    email = "offline@tuiter.com",
-                )
+                localProfileInfoResponse
             }
     }

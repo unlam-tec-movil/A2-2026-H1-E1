@@ -4,6 +4,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interface
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.login.LoginRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.login.LoginResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.LoginRepository
+import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localLoginResponse
 import javax.inject.Inject
 
 class LoginRepositoryImpl
@@ -15,6 +16,6 @@ class LoginRepositoryImpl
             try {
                 tuiterApiService.login(loginRequest)
             } catch (_: Exception) {
-                LoginResponse("mock-token-para-offline")
+                localLoginResponse
             }
     }

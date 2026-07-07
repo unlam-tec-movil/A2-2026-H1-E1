@@ -114,7 +114,10 @@ fun ShowProfileForm(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(PADDING_LARGE),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(PADDING_LARGE),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -219,7 +222,10 @@ fun EmailTextfield(
 @Composable
 fun ShowPasswordHelp() {
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(PADDING_MEDIUM),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 1.dp,
@@ -343,7 +349,10 @@ fun ConfirmChangesButton(
         textId = R.string.confirm,
         onClickAction = onConfirmChangesAction,
         buttonColor = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        modifier = Modifier.fillMaxWidth().padding(PADDING_MEDIUM),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(PADDING_MEDIUM),
         isEnabled = !enabledStatus,
     )
 }
@@ -353,14 +362,20 @@ fun ConfirmChangesButton(
 private fun ProfileScreenPreview() {
     ScaffoldingV2Theme {
         Surface(
-            modifier = Modifier.fillMaxSize().padding(PADDING_MEDIUM),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(PADDING_MEDIUM),
             shape = RoundedCornerShape(PADDING_MEDIUM),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp,
             shadowElevation = 4.dp,
         ) {
             Column(
-                modifier = Modifier.padding(PADDING_MEDIUM).fillMaxSize(),
+                modifier =
+                    Modifier
+                        .padding(PADDING_MEDIUM)
+                        .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

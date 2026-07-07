@@ -51,7 +51,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -71,6 +70,12 @@ class MainActivity : ComponentActivity() {
 
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
+
+            val snackBarAction: (String) -> Unit = { message ->
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
+            }
 
             LaunchedEffect(Unit) {
                 val savedToken = tokenManager.tokenFlow.first()
@@ -116,26 +121,14 @@ class MainActivity : ComponentActivity() {
                                             selectedPost = post
                                             currentScreen = POST_DETAIL
                                         },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                     )
                                 }
 
                                 CREATE_NEW_POST -> {
                                     GoToPostCreationScreen(
                                         onNavigate = { currentScreen = it },
-                                        onShowSnackBar = {
-                                            launchSnackBarCoroutine(
-                                                snackbarHostState = snackbarHostState,
-                                                snackBarMessage = it,
-                                                coroutineScope = coroutineScope,
-                                            )
-                                        },
+                                        onShowSnackBar = snackBarAction,
                                     )
                                 }
 
@@ -335,13 +328,5 @@ class MainActivity : ComponentActivity() {
             onBackAction = { onNavigate(FEED) },
             onFavoriteUserClick = onFavoriteUserClick,
         )
-    }
-
-    private fun launchSnackBarCoroutine(
-        snackbarHostState: SnackbarHostState,
-        snackBarMessage: String,
-        coroutineScope: CoroutineScope,
-    ) {
-        coroutineScope.launch { snackbarHostState.showSnackbar(snackBarMessage) }
     }
 }
