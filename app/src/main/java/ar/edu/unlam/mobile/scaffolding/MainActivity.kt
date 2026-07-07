@@ -37,7 +37,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.FEED
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.LOGIN
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.POST_DETAIL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REGISTER
-import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REPLY_POST
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.USERS_MARKED_AS_FAVORITE
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
@@ -46,7 +45,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.PostReplyScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -110,7 +108,6 @@ class MainActivity : ComponentActivity() {
                                 FEED -> {
                                     GoToFeedScreen(
                                         onNavigate = { currentScreen = it },
-                                        onReplyAction = { replyPostId = it },
                                         onPostDetailAction = { postDetailId = it },
                                         onShowSnackBar = {
                                             launchSnackBarCoroutine(
@@ -132,13 +129,6 @@ class MainActivity : ComponentActivity() {
                                                 coroutineScope = coroutineScope,
                                             )
                                         },
-                                    )
-                                }
-
-                                REPLY_POST -> {
-                                    GoToReplyScreen(
-                                        replyPostId = replyPostId,
-                                        onNavigate = { currentScreen = it },
                                     )
                                 }
 
@@ -224,7 +214,6 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun GoToFeedScreen(
         onNavigate: (AppScreen) -> Unit,
-        onReplyAction: (Int) -> Unit,
         onPostDetailAction: (Int) -> Unit,
         onShowSnackBar: (String) -> Unit,
     ) {
@@ -234,8 +223,8 @@ class MainActivity : ComponentActivity() {
                 onNavigate(CREATE_NEW_POST)
             },
             onNavigateToReply = { postId ->
-                onReplyAction(postId)
-                onNavigate(REPLY_POST)
+                onPostDetailAction(postId)
+                onNavigate(POST_DETAIL)
             },
             onNavigateToPostDetail = { postId ->
                 onPostDetailAction(postId)
@@ -275,18 +264,10 @@ class MainActivity : ComponentActivity() {
             onBack = { onNavigate(FEED) },
             onReply = {
                 onReplyAction(it)
-                onNavigate(REPLY_POST)
+                onNavigate(POST_DETAIL)
             },
             onShowSnackbar = onShowSnackBar,
         )
-    }
-
-    @Composable
-    private fun GoToReplyScreen(
-        replyPostId: Int,
-        onNavigate: (AppScreen) -> Unit,
-    ) {
-        PostReplyScreen(hiltViewModel(), { onNavigate(FEED) }, replyPostId)
     }
 
     @Composable
