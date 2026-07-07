@@ -2,7 +2,6 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens.profile
 
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.TokenManager
-import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interfaces.NetworkObject
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoUpdateRequest
@@ -25,9 +24,7 @@ class ProfileInfoViewModel
     constructor(
         private val profileInfoRepository: ProfileInfoRepository,
         private val tokenManager: TokenManager,
-    ) : BaseViewModel<Unit>(),
-        NetworkObject<ProfileInfoRequest, ProfileInfoResponse> {
-        @Suppress("ktlint:standard:backing-property-naming")
+    ) : BaseViewModel<Unit>() {
         private val _isSaving = MutableStateFlow(false)
         val isSaving = _isSaving.asStateFlow()
 
@@ -160,12 +157,12 @@ class ProfileInfoViewModel
         private fun createUpdateRequestObject(): ProfileInfoUpdateRequest =
             ProfileInfoUpdateRequest(_name.value, _avatarUrl.value, _newPassword.value)
 
-        override suspend fun createRequestObject(): ProfileInfoRequest {
+        suspend fun createRequestObject(): ProfileInfoRequest {
             val userToken = tokenManager.tokenFlow.first()
 
             return ProfileInfoRequest(userToken)
         }
 
-        override suspend fun createReponseObject(request: ProfileInfoRequest): ProfileInfoResponse =
+        suspend fun createReponseObject(request: ProfileInfoRequest): ProfileInfoResponse =
             profileInfoRepository.getCurrentProfileInfo(request)
     }
