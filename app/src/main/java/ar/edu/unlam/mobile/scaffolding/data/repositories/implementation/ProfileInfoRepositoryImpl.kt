@@ -6,6 +6,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.P
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.profile.ProfileInfoUpdateRequest
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.ProfileInfoRepository
 import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localProfileInfoResponse
+import java.io.IOException
 import javax.inject.Inject
 
 class ProfileInfoRepositoryImpl
@@ -14,11 +15,7 @@ class ProfileInfoRepositoryImpl
         private val tuiterApiService: TuiterApiService,
     ) : ProfileInfoRepository {
         override suspend fun getCurrentProfileInfo(profileInfoRequest: ProfileInfoRequest): ProfileInfoResponse =
-            try {
-                tuiterApiService.getProfileInfo(profileInfoRequest.token)
-            } catch (_: Exception) {
-                localProfileInfoResponse
-            }
+            tuiterApiService.getProfileInfo(profileInfoRequest.token)
 
         override suspend fun updateProfileInfo(
             token: String,
@@ -26,7 +23,7 @@ class ProfileInfoRepositoryImpl
         ): ProfileInfoResponse =
             try {
                 tuiterApiService.updateProfile(token, profileInfoUpdateRequest)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 localProfileInfoResponse
             }
     }

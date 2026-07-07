@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.samplePostsForFeedPreview
@@ -40,6 +41,7 @@ fun FeedScreen(
     onNavigateToReply: (PostResponse) -> Unit,
     onNavigateToPostDetail: (PostResponse) -> Unit = {},
     onShowSnackbar: (String) -> Unit,
+    onUnauthorized: () -> Unit = {},
 ) {
     val uiState by feedViewModel.uiState.collectAsState()
     val markedAsFavoriteSnackbar = stringResource(R.string.marked_as_favorite_snackbar)
@@ -70,6 +72,7 @@ fun FeedScreen(
             onLike = { post ->
                 feedViewModel.togglePostLike(post.id, post.liked)
             },
+            onUnauthorized = onUnauthorized,
         )
     }
 }
@@ -78,10 +81,12 @@ fun FeedScreen(
 @Composable
 private fun TopBar() {
     TopAppBar(
+        expandedHeight = 48.dp,
         title = {
             Text(
                 text = "Inicio",
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
             )
         },
         colors =
@@ -102,6 +107,7 @@ private fun FeedContent(
     onReply: (PostResponse) -> Unit,
     onLike: (PostResponse) -> Unit,
     onPostClick: (PostResponse) -> Unit,
+    onUnauthorized: () -> Unit,
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
 
@@ -151,10 +157,16 @@ private fun FeedContent(
             }
 
             is UiState.Error -> {
-                ShowErrorMessageOnScreen(
-                    onRetryAction,
-                    errorMessage = uiState.error,
-                )
+                if (uiState.error.contains("401")) {
+                    LaunchedEffect(Unit) {
+                        onUnauthorized()
+                    }
+                } else {
+                    ShowErrorMessageOnScreen(
+                        onRetryAction,
+                        errorMessage = uiState.error,
+                    )
+                }
             }
         }
     }
@@ -172,6 +184,7 @@ private fun FeedContentPreview() {
             onPostClick = {},
             onLike = {},
             onSelectedAsFavoriteAction = { _, _, _, _ -> },
+            onUnauthorized = {},
         )
     }
 }

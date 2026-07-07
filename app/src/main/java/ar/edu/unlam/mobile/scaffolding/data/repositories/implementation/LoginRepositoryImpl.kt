@@ -4,7 +4,6 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.interface
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.login.LoginRequest
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.login.LoginResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.LoginRepository
-import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localLoginResponse
 import javax.inject.Inject
 
 class LoginRepositoryImpl
@@ -12,10 +11,7 @@ class LoginRepositoryImpl
     constructor(
         private val tuiterApiService: TuiterApiService,
     ) : LoginRepository {
-        override suspend fun login(loginRequest: LoginRequest): LoginResponse =
-            try {
-                tuiterApiService.login(loginRequest)
-            } catch (_: Exception) {
-                localLoginResponse
-            }
+        override suspend fun login(loginRequest: LoginRequest): LoginResponse {
+            return tuiterApiService.login(loginRequest)
+        }
     }

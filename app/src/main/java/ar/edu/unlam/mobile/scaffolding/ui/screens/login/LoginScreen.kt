@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -57,12 +56,12 @@ fun LoginScreen(
     when (val state = uiState) {
         is UiState.Idle -> {
             ShowLoginForm(
-                emailState,
-                passwordState,
-                { loginViewModel.updateEmailState(it) },
-                { loginViewModel.updatePasswordState(it) },
-                { loginViewModel.login() },
-                onNavigateToRegister,
+                email = emailState,
+                password = passwordState,
+                onEmailChange = { loginViewModel.updateEmailState(it) },
+                onPasswordChange = { loginViewModel.updatePasswordState(it) },
+                onLoginClick = { loginViewModel.login() },
+                onRegisterClick = onNavigateToRegister,
             )
         }
 
@@ -71,11 +70,22 @@ fun LoginScreen(
         }
 
         is UiState.Success -> {
-            onLoginSuccess()
+            LaunchedEffect(Unit) {
+                loginViewModel.restoreStatus()
+                onLoginSuccess()
+            }
         }
 
         is UiState.Error -> {
-            ShowErrorScreen(state.error) { loginViewModel.restoreStatus() }
+            ShowLoginForm(
+                email = emailState,
+                password = passwordState,
+                onEmailChange = { loginViewModel.updateEmailState(it) },
+                onPasswordChange = { loginViewModel.updatePasswordState(it) },
+                onLoginClick = { loginViewModel.login() },
+                onRegisterClick = onNavigateToRegister,
+                errorMessage = state.error,
+            )
         }
     }
 }
@@ -88,6 +98,7 @@ private fun ShowLoginForm(
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
+    errorMessage: String? = null,
 ) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
@@ -157,6 +168,16 @@ private fun ShowLoginForm(
                     KeyboardOptions(keyboardType = KeyboardType.Password),
                 )
 
+                if (!errorMessage.isNullOrBlank()) {
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
                 Row(
                     modifier = Modifier.padding(top = PADDING_LARGE),
                     verticalAlignment = Alignment.CenterVertically,
@@ -166,6 +187,7 @@ private fun ShowLoginForm(
                         checked = false,
                         onCheckedChange = null,
                     )
+
                     TuiterTextLabel(
                         textId = R.string.keep_session_credentials,
                         textStyle = MaterialTheme.typography.bodyMedium,
@@ -173,6 +195,7 @@ private fun ShowLoginForm(
                         modifier = Modifier.padding(horizontal = PADDING_MEDIUM),
                     )
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TuiterButton(
@@ -193,58 +216,6 @@ private fun ShowLoginForm(
                     R.string.sign_up,
                     onRegisterClick,
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                    Modifier.fillMaxWidth(),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShowErrorScreen(
-    errorMessage: String,
-    onRetry: () -> Unit,
-) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.errorContainer),
-        contentAlignment = Alignment.Center,
-    ) {
-        Surface(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(PADDING_LARGE),
-            shape = RoundedCornerShape(PADDING_LARGE),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp,
-            shadowElevation = 4.dp,
-        ) {
-            Column(
-                modifier = Modifier.padding(PADDING_LARGE),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "Error",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Text(
-                    text = errorMessage,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(vertical = PADDING_LARGE),
-                    textAlign = TextAlign.Center,
-                )
-
-                TuiterButton(
-                    R.string.retry_label,
-                    onRetry,
-                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     Modifier.fillMaxWidth(),
                 )
             }

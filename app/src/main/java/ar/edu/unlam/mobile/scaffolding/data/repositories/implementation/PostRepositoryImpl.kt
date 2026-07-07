@@ -14,6 +14,8 @@ import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.localReply
 import ar.edu.unlam.mobile.scaffolding.data.repositories.sampledata.samplePostResponseList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import retrofit2.HttpException
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -35,7 +37,7 @@ class PostRepositoryImpl
         ): PostCreationResponse =
             try {
                 tuiterApiService.createPost(createPostRequest, userToken)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 localPostCreationResponse1
             }
 
@@ -49,16 +51,16 @@ class PostRepositoryImpl
                     try {
                         tuiterApiService.getPosts(
                             userToken = token,
-                            pageNumber = STARTING_POST_PAGE_INDEX,
+                            pageNumber = page,
                             onlyParents = true,
                         )
-                    } catch (_: Exception) {
+                    } catch (exception: HttpException) {
+                        throw exception
+                    } catch (_: IOException) {
                         return samplePostResponseList
                     }
 
-                if (posts.isEmpty()) {
-                    break
-                }
+                if (posts.isEmpty()) break
 
                 allPosts.addAll(posts)
                 page++
@@ -83,7 +85,7 @@ class PostRepositoryImpl
                         )
 
                     response.body() ?: emptyList()
-                } catch (_: Exception) {
+                } catch (_: IOException) {
                     emptyList()
                 }
 
@@ -105,12 +107,12 @@ class PostRepositoryImpl
                     tuiterApiService
                         .getPosts(
                             userToken = getToken(),
-                            pageNumber = 1,
+                            pageNumber = STARTING_POST_PAGE_INDEX,
                             onlyParents = false,
                         ).filter { it.parentId > 0 }
                         .groupBy { it.parentId }
                         .mapValues { it.value.size }
-                } catch (_: Exception) {
+                } catch (_: IOException) {
                     emptyMap()
                 }
 
@@ -137,7 +139,7 @@ class PostRepositoryImpl
         ) {
             try {
                 tuiterApiService.likePost(postId, userToken)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 // offline mode - ignore
             }
         }
@@ -148,7 +150,7 @@ class PostRepositoryImpl
         ) {
             try {
                 tuiterApiService.unlikePost(postId, userToken)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 // offline mode - ignore
             }
         }
@@ -164,7 +166,7 @@ class PostRepositoryImpl
                     request = createPostRequest,
                     userToken = userToken,
                 )
-            } catch (_: Exception) {
+            } catch (_: IOException) {
                 saveLocalReply(parentPostId, localReply)
                 localPostCreationResponse2
             }
