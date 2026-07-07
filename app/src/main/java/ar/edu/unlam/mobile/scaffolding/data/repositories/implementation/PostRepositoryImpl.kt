@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.collections.emptyList
 
 class PostRepositoryImpl
     @Inject
@@ -77,15 +78,14 @@ class PostRepositoryImpl
             val apiReplies =
                 try {
                     tuiterApiService
-                        .getPosts(
+                        .getRepliesList(
                             userToken = tokenManager.tokenFlow.first(),
-                            pageNumber = 1,
-                            onlyParents = false,
-                        ).filter { it.parentId == postId }
+                            tuitId = postId,
+                        ).body()
                 } catch (_: Exception) {
                     emptyList()
                 }
-            return apiReplies + (localReplies[postId] ?: emptyList())
+            return apiReplies?.plus((localReplies[postId] ?: emptyList())) ?: emptyList()
         }
 
         override suspend fun getRepliesCounts(): Map<Int, Int> {
@@ -100,7 +100,7 @@ class PostRepositoryImpl
                         .groupBy { it.parentId }
                         .mapValues { it.value.size }
                 } catch (_: Exception) {
-                    emptyMap<Int, Int>()
+                    emptyMap()
                 }
             val localCounts =
                 localReplies.mapValues { it.value.size }
@@ -140,14 +140,4 @@ class PostRepositoryImpl
                 // offline mode - ignore
             }
         }
-
-        override suspend fun getPostReplies(
-            postId: Int,
-            userToken: String,
-        ): List<PostResponse> = tuiterApiService.getRepliesList(userToken, postId).body() ?: emptyList()
-
-        override suspend fun getPostById(
-            postId: Int,
-            userToken: String,
-        ): PostResponse = tuiterApiService.getPostById(postId, userToken)
     }

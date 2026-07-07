@@ -38,14 +38,4 @@ interface PostRepository {
         postId: Int,
         userToken: String,
     )
-
-    suspend fun getPostReplies(
-        postId: Int,
-        userToken: String,
-    ): List<PostResponse>
-
-    suspend fun getPostById(
-        postId: Int,
-        userToken: String,
-    ): PostResponse
 }
