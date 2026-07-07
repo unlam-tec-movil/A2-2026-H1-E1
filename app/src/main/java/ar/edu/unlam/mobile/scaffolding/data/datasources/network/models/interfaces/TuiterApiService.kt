@@ -64,4 +64,23 @@ interface TuiterApiService {
         @Path("id") postId: Int,
         @Header("Authorization") userToken: String,
     )
+
+    @GET("api/v1/me/tuits/{tuit_id}")
+    suspend fun getPostById(
+        @Path("tuit_id") postId: Int,
+        @Header("Authorization") userToken: String,
+    ): PostResponse
+
+    @GET("api/v1/me/tuits/{tuit_id}/replies")
+    suspend fun getRepliesByPostId(
+        @Path("tuit_id") postId: Int,
+        @Header("Authorization") userToken: String,
+    ): retrofit2.Response<List<PostResponse>>
+
+    @POST("api/v1/me/tuits/{tuit_id}/replies")
+    suspend fun createReply(
+        @Path("tuit_id") parentPostId: Int,
+        @Body request: PostCreationRequest,
+        @Header("Authorization") userToken: String,
+    ): PostCreationResponse
 }

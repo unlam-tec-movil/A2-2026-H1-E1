@@ -16,9 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,74 +29,67 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.AVATAR_SIZE
-import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_LARGE
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_MEDIUM
 import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMALL
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
 @Composable
 fun PostCard(
     post: PostResponse,
     isSelectedAsFavorite: Boolean,
     onSelectedAsFavoriteAction: () -> Unit,
+    repliesCount: Int = 0,
     onReply: () -> Unit = {},
     onLike: () -> Unit = {},
+    onPostClick: () -> Unit = {},
 ) {
     Surface(
         modifier =
             Modifier
                 .padding(PADDING_MEDIUM)
                 .fillMaxWidth(),
-        shape = RoundedCornerShape(PADDING_LARGE),
+        shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 2.dp,
         shadowElevation = 4.dp,
+        onClick = onPostClick,
     ) {
         Row(modifier = Modifier.padding(PADDING_MEDIUM)) {
-            PostAvatar()
+            PostAvatar(
+                avatarUrl = post.avatarUrl,
+                author = post.author,
+            )
 
             Spacer(modifier = Modifier.width(PADDING_MEDIUM))
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(PADDING_SMALL),
+                modifier = Modifier.weight(1f),
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
-                    PostText(
-                        post.author,
-                        MaterialTheme.typography.titleMedium,
-                        MaterialTheme.colorScheme.onSurface,
-                    )
-
-                    PostText(
-                        "@usuario",
-                        MaterialTheme.typography.bodyMedium,
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    IconButton(onClick = onSelectedAsFavoriteAction) {
-                        Icon(
-                            imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                            contentDescription = null,
-                        )
-                    }
-                }
+                PostHeader(
+                    author = post.author,
+                    isSelectedAsFavorite = isSelectedAsFavorite,
+                    onSelectedAsFavoriteAction = onSelectedAsFavoriteAction,
+                )
 
                 PostText(
-                    post.message,
-                    MaterialTheme.typography.bodyMedium,
-                    MaterialTheme.colorScheme.onSurface,
+                    textToShow = post.message,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    textColor = MaterialTheme.colorScheme.onSurface,
                 )
 
                 PostActions(
                     likes = post.likes,
                     liked = post.liked,
+                    repliesCount = repliesCount,
                     onReply = onReply,
                     onLike = onLike,
                 )
@@ -106,7 +99,50 @@ fun PostCard(
 }
 
 @Composable
-private fun PostAvatar() {
+private fun PostHeader(
+    author: String,
+    isSelectedAsFavorite: Boolean,
+    onSelectedAsFavoriteAction: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = author,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Text(
+                text = generateUserHandle(author),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        IconButton(onClick = onSelectedAsFavoriteAction) {
+            Icon(
+                imageVector = if (isSelectedAsFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                contentDescription = "Marcar usuario como favorito",
+                tint = if (isSelectedAsFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun PostAvatar(
+    avatarUrl: String,
+    author: String,
+) {
+    val isValidAvatarUrl =
+        avatarUrl.startsWith("http") || avatarUrl.startsWith("data:image")
+
     Box(
         modifier =
             Modifier
@@ -115,11 +151,23 @@ private fun PostAvatar() {
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            Icons.Default.Person,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (avatarUrl.isBlank() || !isValidAvatarUrl) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Avatar de $author",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            GlideImage(
+                model = avatarUrl,
+                contentDescription = "Avatar de $author",
+                modifier =
+                    Modifier
+                        .size(AVATAR_SIZE)
+                        .clip(CircleShape),
+                contentScale = ContentScale.Crop,
+            )
+        }
     }
 }
 
@@ -133,7 +181,7 @@ private fun PostText(
         text = textToShow,
         style = textStyle,
         color = textColor,
-        modifier = Modifier.padding(PADDING_SMALL),
+        modifier = Modifier.padding(top = PADDING_SMALL),
     )
 }
 
@@ -141,11 +189,15 @@ private fun PostText(
 private fun PostActions(
     likes: Int,
     liked: Boolean,
+    repliesCount: Int,
     onReply: () -> Unit,
     onLike: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = PADDING_SMALL),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -154,7 +206,7 @@ private fun PostActions(
         ) {
             IconButton(onClick = onLike) {
                 Icon(
-                    if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Me gusta",
                     tint = if (liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -162,16 +214,38 @@ private fun PostActions(
 
             Text(
                 text = "$likes",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        IconButton(onClick = onReply) {
-            Icon(Icons.Default.Replay, contentDescription = "Responder")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onReply) {
+                Icon(
+                    imageVector = Icons.Outlined.ChatBubbleOutline,
+                    contentDescription = "Responder",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Text(
+                text = "$repliesCount",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
+
+private fun generateUserHandle(author: String): String =
+    "@${
+        author
+            .trim()
+            .lowercase()
+            .replace(" ", ".")
+    }"
 
 @Preview(showBackground = true)
 @Composable
@@ -181,17 +255,18 @@ private fun PostCardPreview() {
             post =
                 PostResponse(
                     id = 1,
-                    author = "Usuario",
                     message = "Este es un post de ejemplo",
-                    likes = 5,
-                    liked = false,
-                    avatarUrl = "tomas.com",
                     parentId = 10,
                     authorId = 7,
-                    date = "2026-1-1",
+                    author = "Paloma Aguirre",
+                    avatarUrl = "https://ui-avatars.com/api/?name=Paloma Aguirre",
+                    likes = 5,
+                    liked = false,
+                    date = "2026-01-01",
                 ),
             isSelectedAsFavorite = true,
             onSelectedAsFavoriteAction = {},
+            repliesCount = 3,
             onReply = {},
             onLike = {},
         )

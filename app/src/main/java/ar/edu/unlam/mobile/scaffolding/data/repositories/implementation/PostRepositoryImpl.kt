@@ -11,6 +11,7 @@ import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostReposito
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import retrofit2.Response
 
 class PostRepositoryImpl
     @Inject
@@ -24,12 +25,45 @@ class PostRepositoryImpl
             userToken: String,
         ): PostCreationResponse = tuiterApiService.createPost(createPostRequest, userToken)
 
-        override suspend fun getPostList(): List<PostResponse> =
-            tuiterApiService.getPosts(
+        override suspend fun getPostList(): List<PostResponse> {
+            val token = tokenManager.tokenFlow.first()
+            val allPosts = mutableListOf<PostResponse>()
+            var page = 1
+
+            while (allPosts.size < 20) {
+                val posts =
+                    tuiterApiService.getPosts(
+                        userToken = token,
+                        pageNumber = page,
+                        onlyParents = true,
+                    )
+
+                if (posts.isEmpty()) {
+                    break
+                }
+
+                allPosts.addAll(posts)
+                page++
+            }
+
+            return allPosts.take(20)
+        }
+
+        override suspend fun getPostById(postId: Int): PostResponse =
+            tuiterApiService.getPostById(
+                postId = postId,
                 userToken = tokenManager.tokenFlow.first(),
-                pageNumber = 1,
-                onlyParents = true,
             )
+
+        override suspend fun getRepliesByPostId(postId: Int): List<PostResponse> {
+            val response =
+                tuiterApiService.getRepliesByPostId(
+                    postId = postId,
+                    userToken = tokenManager.tokenFlow.first(),
+                )
+
+            return response.body() ?: emptyList()
+        }
 
         override suspend fun saveDraft(draft: Draft) {
             draftDao.insert(draft)
@@ -54,4 +88,15 @@ class PostRepositoryImpl
         ) {
             tuiterApiService.unlikePost(postId, userToken)
         }
+
+        override suspend fun createReply(
+            parentPostId: Int,
+            createPostRequest: PostCreationRequest,
+            userToken: String,
+        ): PostCreationResponse =
+            tuiterApiService.createReply(
+                parentPostId = parentPostId,
+                request = createPostRequest,
+                userToken = userToken,
+            )
     }

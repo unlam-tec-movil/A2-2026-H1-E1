@@ -23,17 +23,46 @@ class MockPostRepositoryImpl : PostRepository {
                 PostResponse(
                     id = it,
                     message = "Este es un mensaje ficticio",
-                    parentId = it * 5,
+                    parentId = 0,
                     authorId = it + 3,
                     author = "Autor $it",
-                    avatarUrl = "https://example.com/avatar_$it.jpg",
+                    avatarUrl = "https://ui-avatars.com/api/?name=Autor+$it",
                     likes = (1..20).random(),
                     liked = false,
                     date = "2023-04-0$it",
                 )
             }
+
         return postList
     }
+
+    override suspend fun getPostById(postId: Int): PostResponse =
+        PostResponse(
+            id = postId,
+            message = "Este es el post padre ficticio",
+            parentId = 0,
+            authorId = postId + 3,
+            author = "Autor $postId",
+            avatarUrl = "https://ui-avatars.com/api/?name=Autor+$postId",
+            likes = 5,
+            liked = false,
+            date = "2023-04-01",
+        )
+
+    override suspend fun getRepliesByPostId(postId: Int): List<PostResponse> =
+        (1..3).map {
+            PostResponse(
+                id = postId * 100 + it,
+                message = "Respuesta ficticia $it al post $postId",
+                parentId = postId,
+                authorId = it + 20,
+                author = "Usuario respuesta $it",
+                avatarUrl = "https://ui-avatars.com/api/?name=Usuario+Respuesta+$it",
+                likes = it,
+                liked = false,
+                date = "2023-04-0$it",
+            )
+        }
 
     override suspend fun saveDraft(draft: Draft) {
     }
@@ -58,4 +87,13 @@ class MockPostRepositoryImpl : PostRepository {
         userToken: String,
     ) {
     }
+
+    override suspend fun createReply(
+        parentPostId: Int,
+        createPostRequest: PostCreationRequest,
+        userToken: String,
+    ): PostCreationResponse =
+        PostCreationResponse(
+            message = "",
+        )
 }

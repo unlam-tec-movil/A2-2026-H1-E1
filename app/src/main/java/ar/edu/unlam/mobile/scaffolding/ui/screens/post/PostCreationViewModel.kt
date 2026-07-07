@@ -45,7 +45,18 @@ class PostCreationViewModel
                 try {
                     val token = tokenManager.tokenFlow.first()
                     val request = PostCreationRequest(_message.value, parentId)
-                    val response = postRepository.createNewPost(request, token)
+
+                    val response =
+                        if (parentId != 0) {
+                            postRepository.createReply(
+                                parentPostId = parentId,
+                                createPostRequest = request,
+                                userToken = token,
+                            )
+                        } else {
+                            postRepository.createNewPost(request, token)
+                        }
+
                     setUiAsSuccess(response.message)
                     checkAndDeleteDraftIfNeeded()
                 } catch (exception: Exception) {

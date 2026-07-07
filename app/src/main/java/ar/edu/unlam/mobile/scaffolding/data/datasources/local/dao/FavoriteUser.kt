@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Entity(tableName = "favorite_user")
 data class FavoriteUser(
     @PrimaryKey
+    val authorId: Int,
     val author: String,
     val avatarUrl: String,
 )
@@ -23,6 +24,6 @@ interface FavoriteUserDao {
     @Query("SELECT * FROM favorite_user")
     fun getUsersMarkedAsFavorite(): Flow<List<FavoriteUser>>
 
-    @Query("DELETE FROM favorite_user WHERE author = :author")
-    suspend fun deleteFavoriteUser(author: String)
+    @Query("DELETE FROM favorite_user WHERE authorId = :authorId")
+    suspend fun deleteFavoriteUser(authorId: Int)
 }

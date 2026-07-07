@@ -2,6 +2,7 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens.feed
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +51,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 fun FavoriteUserScreen(
     favoriteUsersViemodel: FavoriteUsersScreenViewModel,
     onBackAction: () -> Unit,
+    onFavoriteUserClick: (FavoriteUser) -> Unit = {},
 ) {
     val uiState by favoriteUsersViemodel.uiState.collectAsState()
 
@@ -69,11 +71,13 @@ fun FavoriteUserScreen(
         }
 
         is UiState.Success -> {
-            ShowFavoriteUsersScreen(state.data) { author ->
-                favoriteUsersViemodel.deleteFromFavoritesByAuthor(
-                    author,
-                )
-            }
+            ShowFavoriteUsersScreen(
+                favoriteUsers = state.data,
+                onFavoriteUserClick = onFavoriteUserClick,
+                onRemoveFromFavoritesAction = { authorId ->
+                    favoriteUsersViemodel.deleteFromFavoritesByAuthorId(authorId)
+                },
+            )
         }
 
         is UiState.Error -> {
@@ -88,7 +92,8 @@ fun FavoriteUserScreen(
 @Composable
 fun ShowFavoriteUsersScreen(
     favoriteUsers: List<FavoriteUser>,
-    onRemoveFromFavoritesAction: (String) -> Unit,
+    onFavoriteUserClick: (FavoriteUser) -> Unit,
+    onRemoveFromFavoritesAction: (Int) -> Unit,
 ) {
     Column(
         modifier =
@@ -111,21 +116,24 @@ fun ShowFavoriteUsersScreen(
             )
         }
 
-        Column {
-            Card(
-                modifier = Modifier.padding(PADDING_MEDIUM),
-                shape = RoundedCornerShape(PADDING_LARGE),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation =
-                    cardElevation(
-                        defaultElevation = 2.dp,
-                    ),
-            ) {
-                LazyColumn {
-                    items(favoriteUsers) { user ->
-                        val author = user.author
-                        FavoriteUserCard(user) { onRemoveFromFavoritesAction(author) }
-                    }
+        Card(
+            modifier = Modifier.padding(PADDING_MEDIUM),
+            shape = RoundedCornerShape(PADDING_LARGE),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation =
+                cardElevation(
+                    defaultElevation = 2.dp,
+                ),
+        ) {
+            LazyColumn {
+                items(favoriteUsers) { user ->
+                    FavoriteUserCard(
+                        user = user,
+                        onFavoriteUserClick = { onFavoriteUserClick(user) },
+                        onRemoveFromFavoritesAction = {
+                            onRemoveFromFavoritesAction(user.authorId)
+                        },
+                    )
                 }
             }
         }
@@ -136,12 +144,14 @@ fun ShowFavoriteUsersScreen(
 @Composable
 private fun FavoriteUserCard(
     user: FavoriteUser,
-    onRemoveFromFavoritesAction: (String) -> Unit,
+    onFavoriteUserClick: () -> Unit,
+    onRemoveFromFavoritesAction: () -> Unit,
 ) {
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .clickable { onFavoriteUserClick() }
                 .padding(PADDING_MEDIUM),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PADDING_MEDIUM),
@@ -156,7 +166,7 @@ private fun FavoriteUserCard(
         ) {
             GlideImage(
                 model = user.avatarUrl,
-                contentDescription = null,
+                contentDescription = "Avatar de ${user.author}",
                 modifier =
                     Modifier
                         .size(AVATAR_SIZE)
@@ -164,21 +174,40 @@ private fun FavoriteUserCard(
             )
         }
 
-        Text(
-            text = user.author,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        Column {
+            Text(
+                text = user.author,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+
+            Text(
+                text = generateUserHandle(user.author),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(
-            onClick = { onRemoveFromFavoritesAction(user.author) },
+            onClick = onRemoveFromFavoritesAction,
         ) {
-            Icon(Icons.Default.DeleteOutline, contentDescription = null)
+            Icon(
+                Icons.Default.DeleteOutline,
+                contentDescription = "Eliminar usuario de favoritos",
+            )
         }
     }
 }
+
+private fun generateUserHandle(author: String): String =
+    "@${
+        author
+            .trim()
+            .lowercase()
+            .replace(" ", ".")
+    }"
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -187,9 +216,18 @@ private fun FavoriteUsersScreenPreview() {
         ShowFavoriteUsersScreen(
             favoriteUsers =
                 listOf(
-                    FavoriteUser(author = "Usuario1", avatarUrl = ""),
-                    FavoriteUser(author = "Usuario2", avatarUrl = ""),
+                    FavoriteUser(
+                        authorId = 1,
+                        author = "Paloma Aguirre",
+                        avatarUrl = "https://ui-avatars.com/api/?name=Paloma+Aguirre",
+                    ),
+                    FavoriteUser(
+                        authorId = 2,
+                        author = "Alan Irigoin",
+                        avatarUrl = "https://ui-avatars.com/api/?name=Alan+Irigoin",
+                    ),
                 ),
+            onFavoriteUserClick = {},
             onRemoveFromFavoritesAction = {},
         )
     }

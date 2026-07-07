@@ -20,25 +20,30 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
+import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.CREATE_NEW_POST
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.EDIT_PROFILE_INFO
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.FAVORITE_USER_POSTS
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.FEED
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.LOGIN
+import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.POST_DETAIL
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REGISTER
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.REPLY_POST
 import ar.edu.unlam.mobile.scaffolding.ui.screens.enums.AppScreen.USERS_MARKED_AS_FAVORITE
+import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserPostsScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FavoriteUserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.feed.FeedScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.login.LoginScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.post.PostCreationScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.postdetail.PostDetailScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.profile.ProfileScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.register.RegisterScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.reply.ReplyScreen
@@ -55,9 +60,13 @@ private const val PROFILE_LABEL = "Perfil"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             var currentScreen by remember { mutableStateOf(LOGIN) }
-            var replyPostId by remember { mutableIntStateOf(0) }
+            var replyParentPost by remember { mutableStateOf<PostResponse?>(null) }
+            var selectedPost by remember { mutableStateOf<PostResponse?>(null) }
+            var selectedFavoriteUser by remember { mutableStateOf<FavoriteUser?>(null) }
+
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
@@ -77,11 +86,10 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                     ) { paddingValues ->
-
                         Surface(modifier = Modifier.padding(paddingValues)) {
                             when (currentScreen) {
                                 LOGIN -> {
-                                    GoToLoginScreen(onNavigate = { currentScreen = it })
+                                    GoToLoginScreen { currentScreen = it }
                                 }
 
                                 REGISTER -> {
@@ -90,9 +98,16 @@ class MainActivity : ComponentActivity() {
 
                                 FEED -> {
                                     GoToFeedScreen(
-                                        { currentScreen = it },
-                                        { replyPostId = it },
-                                        {
+                                        onNavigate = { currentScreen = it },
+                                        onReplyAction = { post ->
+                                            replyParentPost = post
+                                            currentScreen = REPLY_POST
+                                        },
+                                        onPostClick = { post ->
+                                            selectedPost = post
+                                            currentScreen = POST_DETAIL
+                                        },
+                                        onShowSnackBar = {
                                             launchSnackBarCoroutine(
                                                 snackbarHostState = snackbarHostState,
                                                 snackBarMessage = it,
@@ -104,8 +119,8 @@ class MainActivity : ComponentActivity() {
 
                                 CREATE_NEW_POST -> {
                                     GoToPostCreationScreen(
-                                        { currentScreen = it },
-                                        {
+                                        onNavigate = { currentScreen = it },
+                                        onShowSnackBar = {
                                             launchSnackBarCoroutine(
                                                 snackbarHostState = snackbarHostState,
                                                 snackBarMessage = it,
@@ -117,15 +132,30 @@ class MainActivity : ComponentActivity() {
 
                                 REPLY_POST -> {
                                     GoToReplyScreen(
-                                        { currentScreen = it },
-                                        {
+                                        onNavigate = { currentScreen = it },
+                                        onShowSnackBar = {
                                             launchSnackBarCoroutine(
                                                 snackbarHostState = snackbarHostState,
                                                 snackBarMessage = it,
                                                 coroutineScope = coroutineScope,
                                             )
                                         },
-                                        replyPostId,
+                                        replyParentPost = replyParentPost,
+                                    )
+                                }
+
+                                POST_DETAIL -> {
+                                    GoToPostDetailScreen(
+                                        selectedPost = selectedPost,
+                                        onNavigate = { currentScreen = it },
+                                        onReplyAction = { post ->
+                                            replyParentPost = post
+                                            currentScreen = REPLY_POST
+                                        },
+                                        onPostClick = { post ->
+                                            selectedPost = post
+                                            currentScreen = POST_DETAIL
+                                        },
                                     )
                                 }
 
@@ -134,7 +164,24 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 USERS_MARKED_AS_FAVORITE -> {
-                                    GoToFavoritesScreen { currentScreen = it }
+                                    GoToFavoritesScreen(
+                                        onNavigate = { currentScreen = it },
+                                        onFavoriteUserClick = { favoriteUser ->
+                                            selectedFavoriteUser = favoriteUser
+                                            currentScreen = FAVORITE_USER_POSTS
+                                        },
+                                    )
+                                }
+
+                                FAVORITE_USER_POSTS -> {
+                                    GoToFavoriteUserPostsScreen(
+                                        favoriteUser = selectedFavoriteUser,
+                                        onNavigate = { currentScreen = it },
+                                        onReplyAction = { post ->
+                                            replyParentPost = post
+                                            currentScreen = REPLY_POST
+                                        },
+                                    )
                                 }
                             }
                         }
@@ -156,12 +203,14 @@ class MainActivity : ComponentActivity() {
                 onClick = { onNavigate(FEED) },
                 icon = { Icon(Icons.AutoMirrored.Filled.Feed, contentDescription = null) },
             )
+
             NavigationBarItem(
                 selected = currentScreen == USERS_MARKED_AS_FAVORITE,
                 label = { Text(FAVORITES_LABEL) },
                 onClick = { onNavigate(USERS_MARKED_AS_FAVORITE) },
                 icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
             )
+
             NavigationBarItem(
                 selected = currentScreen == EDIT_PROFILE_INFO,
                 label = { Text(PROFILE_LABEL) },
@@ -190,18 +239,15 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun GoToFeedScreen(
         onNavigate: (AppScreen) -> Unit,
-        onReplyAction: (Int) -> Unit,
+        onReplyAction: (PostResponse) -> Unit,
+        onPostClick: (PostResponse) -> Unit,
         onShowSnackBar: (String) -> Unit,
     ) {
         FeedScreen(
             feedViewModel = hiltViewModel(),
-            onNavigateToCreatePost = {
-                onNavigate(CREATE_NEW_POST)
-            },
-            onNavigateToReply = { postId ->
-                onReplyAction(postId)
-                onNavigate(REPLY_POST)
-            },
+            onNavigateToCreatePost = { onNavigate(CREATE_NEW_POST) },
+            onNavigateToReply = { post -> onReplyAction(post) },
+            onNavigateToPostDetail = { post -> onPostClick(post) },
             onShowSnackbar = onShowSnackBar,
         )
     }
@@ -223,15 +269,52 @@ class MainActivity : ComponentActivity() {
     private fun GoToReplyScreen(
         onNavigate: (AppScreen) -> Unit,
         onShowSnackBar: (String) -> Unit,
-        replyPostId: Int,
+        replyParentPost: PostResponse?,
     ) {
-        ReplyScreen(
-            parentPostId = replyPostId,
-            postCreationViewModel = hiltViewModel(),
-            onPostAction = { onNavigate(FEED) },
-            onCancelAction = { onNavigate(FEED) },
-            onShowSnackbar = onShowSnackBar,
-        )
+        replyParentPost?.let { parentPost ->
+            ReplyScreen(
+                parentPost = parentPost,
+                postCreationViewModel = hiltViewModel(),
+                onPostAction = { onNavigate(FEED) },
+                onCancelAction = { onNavigate(FEED) },
+                onShowSnackbar = onShowSnackBar,
+            )
+        }
+    }
+
+    @Composable
+    private fun GoToPostDetailScreen(
+        selectedPost: PostResponse?,
+        onNavigate: (AppScreen) -> Unit,
+        onReplyAction: (PostResponse) -> Unit,
+        onPostClick: (PostResponse) -> Unit,
+    ) {
+        selectedPost?.let { post ->
+            PostDetailScreen(
+                selectedPost = post,
+                postDetailViewModel = hiltViewModel(),
+                onBackAction = { onNavigate(FEED) },
+                onReplyAction = onReplyAction,
+                onPostClick = onPostClick,
+            )
+        }
+    }
+
+    @Composable
+    private fun GoToFavoriteUserPostsScreen(
+        favoriteUser: FavoriteUser?,
+        onNavigate: (AppScreen) -> Unit,
+        onReplyAction: (PostResponse) -> Unit,
+    ) {
+        favoriteUser?.let { user ->
+            FavoriteUserPostsScreen(
+                favoriteUser = user,
+                viewModel = hiltViewModel(),
+                onBack = { onNavigate(USERS_MARKED_AS_FAVORITE) },
+                onReply = onReplyAction,
+                onLike = {},
+            )
+        }
     }
 
     @Composable
@@ -242,10 +325,15 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun GoToFavoritesScreen(onNavigate: (AppScreen) -> Unit) {
-        FavoriteUserScreen(hiltViewModel()) {
-            onNavigate(FEED)
-        }
+    private fun GoToFavoritesScreen(
+        onNavigate: (AppScreen) -> Unit,
+        onFavoriteUserClick: (FavoriteUser) -> Unit,
+    ) {
+        FavoriteUserScreen(
+            favoriteUsersViemodel = hiltViewModel(),
+            onBackAction = { onNavigate(FEED) },
+            onFavoriteUserClick = onFavoriteUserClick,
+        )
     }
 
     private fun launchSnackBarCoroutine(

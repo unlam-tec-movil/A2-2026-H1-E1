@@ -7,7 +7,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.DraftDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUser
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.FavoriteUserDao
 
-@Database(version = 1, entities = [Draft::class, FavoriteUser::class])
+@Database(version = 2, entities = [Draft::class, FavoriteUser::class])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getDraftDao(): DraftDao
 

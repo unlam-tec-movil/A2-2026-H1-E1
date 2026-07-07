@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface FavoriteUserRepository {
     suspend fun saveUserAsFavorite(favoriteUser: FavoriteUser)
 
-    suspend fun deleteUserFromFavorites(favoriteUserName: String)
+    suspend fun deleteUserFromFavorites(authorId: Int)
 
     fun getAllFavoriteUsers(): Flow<List<FavoriteUser>>
 }
