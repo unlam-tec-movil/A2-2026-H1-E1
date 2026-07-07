@@ -1,5 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components.post
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,9 +27,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -40,6 +47,8 @@ import ar.edu.unlam.mobile.scaffolding.ui.constant.dimension.Dimens.PADDING_SMAL
 import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun PostCard(
@@ -84,6 +93,12 @@ fun PostCard(
                     textToShow = post.message,
                     textStyle = MaterialTheme.typography.bodyMedium,
                     textColor = MaterialTheme.colorScheme.onSurface,
+                )
+
+                PostText(
+                    textToShow = formatDate(post.date),
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 PostActions(
@@ -193,6 +208,12 @@ private fun PostActions(
     onReply: () -> Unit,
     onLike: () -> Unit,
 ) {
+    var likedState by remember { mutableStateOf(liked) }
+    val scale by animateFloatAsState(
+        targetValue = if (likedState) 1.15f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = 600f),
+    )
+
     Row(
         modifier =
             Modifier
@@ -204,11 +225,17 @@ private fun PostActions(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onLike) {
+            IconButton(
+                onClick = {
+                    likedState = !likedState
+                    onLike()
+                },
+            ) {
                 Icon(
-                    imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    modifier = Modifier.scale(scale),
+                    imageVector = if (likedState) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Me gusta",
-                    tint = if (liked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (likedState) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -246,6 +273,33 @@ private fun generateUserHandle(author: String): String =
             .lowercase()
             .replace(" ", ".")
     }"
+
+private fun formatDate(dateString: String): String =
+    try {
+        val inputFormats =
+            listOf(
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+                "yyyy-MM-dd",
+            )
+
+        val parsed =
+            inputFormats.firstNotNullOfOrNull { format ->
+                try {
+                    SimpleDateFormat(format, Locale.getDefault()).parse(dateString)
+                } catch (_: Exception) {
+                    null
+                }
+            }
+
+        if (parsed != null) {
+            SimpleDateFormat("dd MMM yyyy HH:mm", Locale("es")).format(parsed)
+        } else {
+            dateString
+        }
+    } catch (_: Exception) {
+        dateString
+    }
 
 @Preview(showBackground = true)
 @Composable

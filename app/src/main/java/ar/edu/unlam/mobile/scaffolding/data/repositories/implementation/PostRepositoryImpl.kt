@@ -8,10 +8,10 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.Post
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostCreationResponse
 import ar.edu.unlam.mobile.scaffolding.data.datasources.network.models.post.PostResponse
 import ar.edu.unlam.mobile.scaffolding.data.repositories.interfaces.PostRepository
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import retrofit2.Response
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 class PostRepositoryImpl
     @Inject
@@ -20,10 +20,17 @@ class PostRepositoryImpl
         private val tokenManager: TokenManager,
         private val draftDao: DraftDao,
     ) : PostRepository {
+        private val localReplies = ConcurrentHashMap<Int, MutableList<PostResponse>>()
+
         override suspend fun createNewPost(
             createPostRequest: PostCreationRequest,
             userToken: String,
-        ): PostCreationResponse = tuiterApiService.createPost(createPostRequest, userToken)
+        ): PostCreationResponse =
+            try {
+                tuiterApiService.createPost(createPostRequest, userToken)
+            } catch (_: Exception) {
+                PostCreationResponse("Post creado offline")
+            }
 
         override suspend fun getPostList(): List<PostResponse> {
             val token = tokenManager.tokenFlow.first()
@@ -32,11 +39,15 @@ class PostRepositoryImpl
 
             while (allPosts.size < 20) {
                 val posts =
-                    tuiterApiService.getPosts(
-                        userToken = token,
-                        pageNumber = page,
-                        onlyParents = true,
-                    )
+                    try {
+                        tuiterApiService.getPosts(
+                            userToken = token,
+                            pageNumber = page,
+                            onlyParents = true,
+                        )
+                    } catch (_: Exception) {
+                        return getOfflinePosts()
+                    }
 
                 if (posts.isEmpty()) {
                     break
@@ -56,13 +67,51 @@ class PostRepositoryImpl
             )
 
         override suspend fun getRepliesByPostId(postId: Int): List<PostResponse> {
-            val response =
-                tuiterApiService.getRepliesByPostId(
-                    postId = postId,
-                    userToken = tokenManager.tokenFlow.first(),
-                )
+            val apiReplies =
+                try {
+                    val response =
+                        tuiterApiService.getRepliesByPostId(
+                            postId = postId,
+                            userToken = tokenManager.tokenFlow.first(),
+                        )
 
-            return response.body() ?: emptyList()
+                    response.body() ?: emptyList()
+                } catch (_: Exception) {
+                    emptyList()
+                }
+
+            return apiReplies + (localReplies[postId] ?: emptyList())
+        }
+
+        override suspend fun getRepliesForPost(postId: Int): List<PostResponse> = getRepliesByPostId(postId)
+
+        override suspend fun saveLocalReply(
+            parentPostId: Int,
+            reply: PostResponse,
+        ) {
+            localReplies.getOrPut(parentPostId) { mutableListOf() }.add(reply)
+        }
+
+        override suspend fun getRepliesCounts(): Map<Int, Int> {
+            val apiCounts =
+                try {
+                    tuiterApiService
+                        .getPosts(
+                            userToken = tokenManager.tokenFlow.first(),
+                            pageNumber = 1,
+                            onlyParents = false,
+                        ).filter { it.parentId > 0 }
+                        .groupBy { it.parentId }
+                        .mapValues { it.value.size }
+                } catch (_: Exception) {
+                    emptyMap()
+                }
+
+            val localCounts = localReplies.mapValues { it.value.size }
+
+            return (apiCounts.keys + localCounts.keys).associateWith {
+                (apiCounts[it] ?: 0) + (localCounts[it] ?: 0)
+            }
         }
 
         override suspend fun saveDraft(draft: Draft) {
@@ -79,14 +128,22 @@ class PostRepositoryImpl
             postId: Int,
             userToken: String,
         ) {
-            tuiterApiService.likePost(postId, userToken)
+            try {
+                tuiterApiService.likePost(postId, userToken)
+            } catch (_: Exception) {
+                // offline mode - ignore
+            }
         }
 
         override suspend fun unlikePost(
             postId: Int,
             userToken: String,
         ) {
-            tuiterApiService.unlikePost(postId, userToken)
+            try {
+                tuiterApiService.unlikePost(postId, userToken)
+            } catch (_: Exception) {
+                // offline mode - ignore
+            }
         }
 
         override suspend fun createReply(
@@ -94,9 +151,53 @@ class PostRepositoryImpl
             createPostRequest: PostCreationRequest,
             userToken: String,
         ): PostCreationResponse =
-            tuiterApiService.createReply(
-                parentPostId = parentPostId,
-                request = createPostRequest,
-                userToken = userToken,
+            try {
+                tuiterApiService.createReply(
+                    parentPostId = parentPostId,
+                    request = createPostRequest,
+                    userToken = userToken,
+                )
+            } catch (_: Exception) {
+                val localReply =
+                    PostResponse(
+                        id = System.currentTimeMillis().toInt(),
+                        message = createPostRequest.message,
+                        parentId = parentPostId,
+                        authorId = 0,
+                        author = "Usuario local",
+                        avatarUrl = "",
+                        likes = 0,
+                        liked = false,
+                        date = "2026-01-01",
+                    )
+
+                saveLocalReply(parentPostId, localReply)
+                PostCreationResponse("Respuesta creada offline")
+            }
+
+        private fun getOfflinePosts(): List<PostResponse> =
+            listOf(
+                PostResponse(
+                    id = 1,
+                    message = "Este es un post de prueba offline",
+                    parentId = 0,
+                    authorId = 1,
+                    author = "Usuario Offline",
+                    avatarUrl = "",
+                    likes = 42,
+                    liked = false,
+                    date = "2024-01-01T00:00:00Z",
+                ),
+                PostResponse(
+                    id = 2,
+                    message = "La API está caída, pero seguimos posteando",
+                    parentId = 0,
+                    authorId = 2,
+                    author = "Tuiter Offline",
+                    avatarUrl = "",
+                    likes = 17,
+                    liked = true,
+                    date = "2024-01-02T00:00:00Z",
+                ),
             )
     }

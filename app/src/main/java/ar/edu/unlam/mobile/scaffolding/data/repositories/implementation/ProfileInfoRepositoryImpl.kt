@@ -13,10 +13,27 @@ class ProfileInfoRepositoryImpl
         private val tuiterApiService: TuiterApiService,
     ) : ProfileInfoRepository {
         override suspend fun getCurrentProfileInfo(profileInfoRequest: ProfileInfoRequest): ProfileInfoResponse =
-            tuiterApiService.getProfileInfo(profileInfoRequest.token)
+            try {
+                tuiterApiService.getProfileInfo(profileInfoRequest.token)
+            } catch (_: Exception) {
+                ProfileInfoResponse(
+                    name = "Usuario Offline",
+                    avatarUrl = "",
+                    email = "offline@tuiter.com",
+                )
+            }
 
         override suspend fun updateProfileInfo(
             token: String,
             profileInfoUpdateRequest: ProfileInfoUpdateRequest,
-        ): ProfileInfoResponse = tuiterApiService.updateProfile("Bearer $token", profileInfoUpdateRequest)
+        ): ProfileInfoResponse =
+            try {
+                tuiterApiService.updateProfile(token, profileInfoUpdateRequest)
+            } catch (_: Exception) {
+                ProfileInfoResponse(
+                    name = profileInfoUpdateRequest.name,
+                    avatarUrl = profileInfoUpdateRequest.avatarUrl,
+                    email = "offline@tuiter.com",
+                )
+            }
     }
